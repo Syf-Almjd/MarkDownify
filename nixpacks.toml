@@ -1,8 +1,10 @@
 [phases.setup]
-# Retain default Node setup ("..."), but add Python and the C++ libraries needed to compile 'canvas'
-nixPkgs = ["...", "python3", "pkg-config", "cairo", "pango", "libjpeg", "giflib", "librsvg"]
+# Added 'pixman' to satisfy the final canvas requirement
+nixPkgs = ["...", "python3", "pkg-config", "cairo", "pango", "libjpeg", "giflib", "librsvg", "pixman"]
 
 [phases.install]
-# Override the default install command to drop the frozen lockfile constraint
-# This forces pnpm to reach out and grab the missing Linux oxc-parser binaries
-cmds = ["pnpm install --no-frozen-lockfile"]
+# Nuke the cached modules/lockfile to clear out Windows/Mac binaries, then install fresh
+cmds = [
+    "rm -rf node_modules pnpm-lock.yaml",
+    "pnpm install"
+]
