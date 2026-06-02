@@ -10,8 +10,8 @@ WORKDIR /app
 # Copy only the package files first to leverage Docker cache
 COPY package.json pnpm-lock.yaml ./
 
-# Bypass pnpm's strict script blocking and install dependencies
-RUN pnpm config set ignore-scripts false && pnpm install --frozen-lockfile
+# Install dependencies normally (it will read your new package.json whitelist)
+RUN pnpm install --frozen-lockfile
 
 # Copy the rest of your application code
 COPY . .
