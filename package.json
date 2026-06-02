@@ -30,7 +30,7 @@
     "typescript": "^6.0.3",
     "vue-tsc": "^3.3.3"
   },
-  "packageManager": "pnpm@11.5.0",
+  "packageManager": "pnpm@10.32.0",
   "author": "SaifAlmajd (https://github.com/Syf-Almjd)",
   "repository": {
     "type": "git",
@@ -39,5 +39,15 @@
   "bugs": {
     "url": "https://github.com/Syf-Almjd/cli-doc2md-mcp/issues"
   },
-  "homepage": "https://github.com/Syf-Almjd/cli-doc2md-mcp#readme"
+  "homepage": "https://github.com/Syf-Almjd/cli-doc2md-mcp#readme",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "canvas",
+      "esbuild",
+      "tesseract.js",
+      "unrs-resolver",
+      "vue-demi"
+    ]
+  }
 }
