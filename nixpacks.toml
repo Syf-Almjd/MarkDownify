@@ -1,10 +1,6 @@
-[phases.setup]
-# Added 'pixman' to satisfy the final canvas requirement
-nixPkgs = ["...", "python3", "pkg-config", "cairo", "pango", "libjpeg", "giflib", "librsvg", "pixman"]
-
 [phases.install]
-# Nuke the cached modules/lockfile to clear out Windows/Mac binaries, then install fresh
+# Nuke the cached modules/lockfile, then install with a flattened folder structure
 cmds = [
     "rm -rf node_modules pnpm-lock.yaml",
-    "pnpm install"
+    "pnpm install --config.node-linker=hoisted"
 ]
