@@ -313,10 +313,10 @@ const calculatorStats = computed(() => {
           Open-Source Workspace
         </span>
         <h1 class="text-3xl md:text-4xl font-black tracking-tight text-neutral-900 dark:text-white">
-          Token Saver <span class="text-primary-500">Studio</span>
+          Make your AI Prompts <span class="text-primary-500">Smarter</span>
         </h1>
         <p class="text-sm text-neutral-500 dark:text-neutral-400 max-w-2xl leading-relaxed">
-          Convert any document into highly optimized, prompt-ready Markdown completely on-device. 
+          Convert your files into highly optimized, prompt-ready Markdown completely on-device. 
           Save up to <strong class="font-extrabold text-neutral-900 dark:text-white">70% of LLM tokens</strong> for massive API savings and precision prompts.
         </p>
       </div>
