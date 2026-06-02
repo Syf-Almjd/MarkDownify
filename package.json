@@ -39,15 +39,5 @@
   "bugs": {
     "url": "https://github.com/Syf-Almjd/cli-doc2md-mcp/issues"
   },
-  "homepage": "https://github.com/Syf-Almjd/cli-doc2md-mcp#readme",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "canvas",
-      "esbuild",
-      "tesseract.js",
-      "unrs-resolver",
-      "vue-demi"
-    ]
-  }
+  "homepage": "https://github.com/Syf-Almjd/cli-doc2md-mcp#readme"
 }
