@@ -40,7 +40,7 @@ const shareApp = async () => {
   const shareData = {
     title: 'MarkDownify',
     text: 'Convert any document into highly optimized, prompt-ready Markdown completely on-device. Save up to 70% of LLM tokens!',
-    url: 'http://markdownify.alaqsa.tech/'
+    url: 'http://markdownify.qzz.io/'
   }
 
   if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
@@ -60,7 +60,7 @@ const shareApp = async () => {
 
 const copyToClipboard = () => {
   try {
-    navigator.clipboard.writeText('http://markdownify.alaqsa.tech/')
+    navigator.clipboard.writeText('http://markdownify.qzz.io/')
     showToast('App link copied to clipboard!')
   } catch (err) {
     console.error('Failed to copy link:', err)
