@@ -1,0 +1,7 @@
+ignore-scripts=false
+allow-build[]=@parcel/watcher
+allow-build[]=canvas
+allow-build[]=esbuild
+allow-build[]=tesseract.js
+allow-build[]=unrs-resolver
+allow-build[]=vue-demi
