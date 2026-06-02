@@ -22,6 +22,7 @@ const filesQueue = ref<FileItem[]>([])
 const selectedFileId = ref<string | null>(null)
 const isProcessing = ref(false)
 const ocrEnabled = ref(false)
+const showEstimator = ref(false)
 
 // Toast system
 const toastMsg = ref<string | null>(null)
@@ -523,144 +524,164 @@ const calculatorStats = computed(() => {
         <!-- INTERACTIVE TOKEN COST & SAVINGS ESTIMATOR CARD (Solid clean layout, adapted for left column) -->
         <div class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl p-5 space-y-5 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
           <div class="absolute -top-24 -left-24 w-48 h-48 bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
-          <div class="flex items-center gap-3 relative z-10">
-            <div class="w-9 h-9 rounded-xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center text-primary-500 shadow-inner shrink-0">
+          
+          <!-- Collapsible Header -->
+          <div 
+            class="flex items-center justify-between gap-3 relative z-10 cursor-pointer select-none group/est"
+            @click="showEstimator = !showEstimator"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center text-primary-500 shadow-inner shrink-0 group-hover/est:scale-105 transition-transform duration-300">
+                <UIcon
+                  name="i-lucide-calculator"
+                  class="w-4.5 h-4.5 text-primary-500"
+                />
+              </div>
+              <div>
+                <h3 class="text-xs font-extrabold text-neutral-900 dark:text-white tracking-tight flex items-center gap-1.5">
+                  Token & Cost Savings Estimator
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/25 font-bold uppercase tracking-wide">
+                    Calc
+                  </span>
+                </h3>
+                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 leading-normal">
+                  Calculate prompt savings using MarkDownify formatting.
+                </p>
+              </div>
+            </div>
+            
+            <div class="p-1 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors">
               <UIcon
-                name="i-lucide-calculator"
-                class="w-4.5 h-4.5 text-primary-500"
+                :name="showEstimator ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                class="w-5 h-5 transition-transform duration-300"
               />
             </div>
-            <div>
-              <h3 class="text-xs font-extrabold text-neutral-900 dark:text-white tracking-tight">
-                Token & Cost Savings Estimator
-              </h3>
-              <p class="text-[10px] text-neutral-500 dark:text-neutral-400 leading-normal">
-                Calculate prompt savings using MarkDownify formatting.
-              </p>
-            </div>
           </div>
 
-          <div class="space-y-4 relative z-10">
-            <!-- Inputs -->
-            <div class="space-y-4 border-b border-neutral-200/60 dark:border-neutral-800/40 pb-4">
-              <!-- LLM Model Selection -->
-              <div class="space-y-1.5">
-                <label class="text-[9px] font-extrabold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
-                  Target LLM Model
-                </label>
-                <select 
-                  v-model="selectedModel"
-                  class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-950/50 text-xs font-semibold text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-500/45 transition-all cursor-pointer shadow-inner"
-                >
-                  <option 
-                    v-for="(val, key) in llmModels" 
-                    :key="key" 
-                    :value="key"
+          <!-- Collapsible Content Body -->
+          <Transition name="expand">
+            <div v-show="showEstimator" class="space-y-4 relative z-10 pt-4 border-t border-neutral-100 dark:border-neutral-800/40">
+              <!-- Inputs -->
+              <div class="space-y-4 border-b border-neutral-200/60 dark:border-neutral-800/40 pb-4">
+                <!-- LLM Model Selection -->
+                <div class="space-y-1.5">
+                  <label class="text-[9px] font-extrabold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
+                    Target LLM Model
+                  </label>
+                  <select 
+                    v-model="selectedModel"
+                    class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-950/50 text-xs font-semibold text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-500/45 transition-all cursor-pointer shadow-inner"
                   >
-                    {{ val.name }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Monthly files slider -->
-              <div class="space-y-2">
-                <div class="flex items-center justify-between text-xs font-semibold">
-                  <span class="text-[9px] font-extrabold  uppercase tracking-wider">Monthly Files</span>
-                  <span class="font-mono font-bold text-neutral-900 dark:text-white px-2 py-0.5 rounded text-[10px]">{{ docsPerMonth }} files</span>
-                </div>
-                <input 
-                  v-model.number="docsPerMonth"
-                  type="range"
-                  min="10"
-                  max="1000"
-                  step="10"
-                  class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                />
-              </div>
-
-              <!-- Document Size Slider -->
-              <div class="space-y-2">
-                <div class="flex items-center justify-between text-xs font-semibold">
-                  <span class="text-[9px] font-extrabold uppercase tracking-wider">Avg. Document Size</span>
-                  <span class="font-mono font-bold text-neutral-900 dark:text-white  px-2 py-0.5 rounded text-[10px]">{{ avgDocSizeKb }} KB</span>
-                </div>
-                <input 
-                  v-model.number="avgDocSizeKb"
-                  type="range"
-                  min="10"
-                  max="1000"
-                  step="10"
-                  class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                />
-                <p class="text-[9px] text-neutral-400 dark:text-neutral-550 italic mt-1 font-medium">
-                  ~{{ (avgDocSizeKb * 800).toLocaleString() }} source tokens
-                </p>
-              </div>
-            </div>
-
-            <!-- Output: Token reduction bar graph representation -->
-            <div class="border border-neutral-200/65 dark:border-neutral-800/40 rounded-xl p-4 bg-neutral-50/50 dark:bg-neutral-950/20 flex flex-col justify-between space-y-3.5 shadow-inner">
-              <span class="text-[9px] font-extrabold text-neutral-450 dark:text-neutral-500 uppercase tracking-wider block">
-                Monthly Token Load
-              </span>
-              
-              <div class="space-y-3 my-1">
-                <!-- Unoptimized Row -->
-                <div class="space-y-1">
-                  <div class="flex justify-between text-[11px] font-mono font-semibold">
-                    <span class="text-neutral-555 dark:text-neutral-400 flex items-center gap-1.5">
-                      <span class="w-1.5 h-1.5 rounded-full bg-neutral-400" />
-                      Unoptimized
-                    </span>
-                    <span class="text-neutral-700 dark:text-neutral-300 font-bold">{{ (calculatorStats.originalTokens / 1000000).toFixed(1) }}M</span>
-                  </div>
-                  <div class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden shadow-inner">
-                    <div class="h-full bg-neutral-400 dark:bg-neutral-600 rounded-full w-full" />
-                  </div>
+                    <option 
+                      v-for="(val, key) in llmModels" 
+                      :key="key" 
+                      :value="key"
+                    >
+                      {{ val.name }}
+                    </option>
+                  </select>
                 </div>
 
-                <!-- Optimized Row -->
-                <div class="space-y-1">
-                  <div class="flex justify-between text-[11px] font-mono font-semibold">
-                    <span class="text-emerald-500 flex items-center gap-1.5">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      MarkDownify
-                    </span>
-                    <span class="text-emerald-500 font-extrabold">{{ (calculatorStats.optimizedTokens / 1000000).toFixed(1) }}M</span>
+                <!-- Monthly files slider -->
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between text-xs font-semibold">
+                    <span class="text-[9px] font-extrabold uppercase tracking-wider">Monthly Files</span>
+                    <span class="font-mono font-bold text-neutral-900 dark:text-white px-2 py-0.5 rounded text-[10px]">{{ docsPerMonth }} files</span>
                   </div>
-                  <div class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden shadow-inner relative">
-                    <div class="h-full bg-emerald-500 rounded-full w-[30%] shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-550" />
+                  <input 
+                    v-model.number="docsPerMonth"
+                    type="range"
+                    min="10"
+                    max="1000"
+                    step="10"
+                    class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                  />
+                </div>
+
+                <!-- Document Size Slider -->
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between text-xs font-semibold">
+                    <span class="text-[9px] font-extrabold uppercase tracking-wider">Avg. Document Size</span>
+                    <span class="font-mono font-bold text-neutral-900 dark:text-white px-2 py-0.5 rounded text-[10px]">{{ avgDocSizeKb }} KB</span>
                   </div>
+                  <input 
+                    v-model.number="avgDocSizeKb"
+                    type="range"
+                    min="10"
+                    max="1000"
+                    step="10"
+                    class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                  />
+                  <p class="text-[9px] text-neutral-400 dark:text-neutral-550 italic mt-1 font-medium">
+                    ~{{ (avgDocSizeKb * 800).toLocaleString() }} source tokens
+                  </p>
                 </div>
               </div>
 
-              <p class="text-[9.5px] text-neutral-550 dark:text-neutral-400 leading-relaxed pt-2 border-t border-neutral-200/50 dark:border-neutral-800/40 font-medium">
-                Saves **{{ (calculatorStats.savedTokens / 1000000).toFixed(1) }}M tokens** in prompts.
-              </p>
-            </div>
+              <!-- Output: Token reduction bar graph representation -->
+              <div class="border border-neutral-200/65 dark:border-neutral-800/40 rounded-xl p-4 bg-neutral-50/50 dark:bg-neutral-950/20 flex flex-col justify-between space-y-3.5 shadow-inner">
+                <span class="text-[9px] font-extrabold text-neutral-450 dark:text-neutral-500 uppercase tracking-wider block">
+                  Monthly Token Load
+                </span>
+                
+                <div class="space-y-3 my-1">
+                  <!-- Unoptimized Row -->
+                  <div class="space-y-1">
+                    <div class="flex justify-between text-[11px] font-mono font-semibold">
+                      <span class="text-neutral-555 dark:text-neutral-400 flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-400" />
+                        Unoptimized
+                      </span>
+                      <span class="text-neutral-700 dark:text-neutral-300 font-bold">{{ (calculatorStats.originalTokens / 1000000).toFixed(1) }}M</span>
+                    </div>
+                    <div class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden shadow-inner">
+                      <div class="h-full bg-neutral-400 dark:bg-neutral-600 rounded-full w-full" />
+                    </div>
+                  </div>
 
-            <!-- Financial cost savings payout -->
-            <div class="border border-neutral-200/60 dark:border-neutral-800/40 rounded-xl p-4 bg-emerald-500/5 border-emerald-500/10 flex flex-col justify-between relative overflow-hidden">
-              <div class="absolute -right-6 -bottom-6 text-emerald-500/10 font-bold text-7xl pointer-events-none select-none font-sans">$</div>
-              <span class="text-[9px] font-extrabold text-neutral-450 dark:text-neutral-500 uppercase tracking-wider block">
-                Cumulative Cash Saved
-              </span>
+                  <!-- Optimized Row -->
+                  <div class="space-y-1">
+                    <div class="flex justify-between text-[11px] font-mono font-semibold">
+                      <span class="text-emerald-500 flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        MarkDownify
+                      </span>
+                      <span class="text-emerald-500 font-extrabold">{{ (calculatorStats.optimizedTokens / 1000000).toFixed(1) }}M</span>
+                    </div>
+                    <div class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden shadow-inner relative">
+                      <div class="h-full bg-emerald-500 rounded-full w-[30%] shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-550" />
+                    </div>
+                  </div>
+                </div>
 
-              <div class="py-2.5 z-10">
-                <p class="text-3xl font-black text-emerald-500 tracking-tight filter drop-shadow-[0_0_15px_rgba(16,185,129,0.15)] leading-none">
-                  ${{ Math.round(calculatorStats.monthlySavings).toLocaleString() }}<span class="text-xs font-semibold text-neutral-550 dark:text-neutral-450">/mo</span>
-                </p>
-                <p class="text-[11px] font-bold text-neutral-700 dark:text-neutral-300 mt-2 flex items-center gap-1 leading-none">
-                  <UIcon name="i-lucide-trending-up" class="w-3.5 h-3.5 text-emerald-500" />
-                  <span>${{ Math.round(calculatorStats.annualSavings).toLocaleString() }} saved annually</span>
+                <p class="text-[9.5px] text-neutral-550 dark:text-neutral-400 leading-relaxed pt-2 border-t border-neutral-200/50 dark:border-neutral-800/40 font-medium">
+                  Saves **{{ (calculatorStats.savedTokens / 1000000).toFixed(1) }}M tokens** in prompts.
                 </p>
               </div>
 
-              <div class="border-t border-neutral-200/50 dark:border-neutral-800/40 pt-2 text-[9px] text-neutral-400 dark:text-neutral-500 leading-normal font-medium z-10">
-                Based on **{{ llmModels[selectedModel]?.name || 'Claude' }}** input/output ratios.
+              <!-- Financial cost savings payout -->
+              <div class="border border-neutral-200/60 dark:border-neutral-800/40 rounded-xl p-4 bg-emerald-500/5 border-emerald-500/10 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute -right-6 -bottom-6 text-emerald-500/10 font-bold text-7xl pointer-events-none select-none font-sans">$</div>
+                <span class="text-[9px] font-extrabold text-neutral-450 dark:text-neutral-500 uppercase tracking-wider block">
+                  Cumulative Cash Saved
+                </span>
+
+                <div class="py-2.5 z-10">
+                  <p class="text-3xl font-black text-emerald-500 tracking-tight filter drop-shadow-[0_0_15px_rgba(16,185,129,0.15)] leading-none">
+                    ${{ Math.round(calculatorStats.monthlySavings).toLocaleString() }}<span class="text-xs font-semibold text-neutral-550 dark:text-neutral-450">/mo</span>
+                  </p>
+                  <p class="text-[11px] font-bold text-neutral-700 dark:text-neutral-300 mt-2 flex items-center gap-1 leading-none">
+                    <UIcon name="i-lucide-trending-up" class="w-3.5 h-3.5 text-emerald-500" />
+                    <span>${{ Math.round(calculatorStats.annualSavings).toLocaleString() }} saved annually</span>
+                  </p>
+                </div>
+
+                <div class="border-t border-neutral-200/50 dark:border-neutral-800/40 pt-2 text-[9px] text-neutral-400 dark:text-neutral-550 leading-normal font-medium z-10">
+                  Based on **{{ llmModels[selectedModel]?.name || 'Claude' }}** input/output ratios.
+                </div>
               </div>
             </div>
-          </div>
+          </Transition>
         </div>
       </div>
 
@@ -886,5 +907,22 @@ input[type=range]::-webkit-slider-runnable-track {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
+}
+
+/* Expand/Collapse accordion transition */
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 1200px;
+  opacity: 1;
+  overflow: hidden;
+}
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-top-color: transparent !important;
 }
 </style>
