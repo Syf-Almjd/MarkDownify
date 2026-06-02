@@ -1,26 +1,31 @@
-# Use an official, lightweight Node.js image
-FROM node:20-alpine
+FROM node:20-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
-# Enable Corepack to install and use pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-# Set the working directory inside the container
+# Dependencies
+FROM base AS deps
 WORKDIR /app
-
-# Copy only the package files first to leverage Docker cache
 COPY package.json pnpm-lock.yaml ./
-
-# Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy the rest of your application code
+# Build
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN pnpm build
 
-# Build the Nuxt application for production
-RUN pnpm run build
+# Production
+FROM node:20-alpine AS runner
+WORKDIR /app
 
-# Expose the default Nuxt port
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
+
+COPY --from=builder /app/.output ./.output
+
 EXPOSE 3000
 
-# Start the built application (Nuxt 3 default output path)
 CMD ["node", ".output/server/index.mjs"]
