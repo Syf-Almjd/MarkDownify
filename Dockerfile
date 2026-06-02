@@ -1,34 +1,26 @@
-FROM node:22-alpine AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# Use an official, lightweight Node.js image
+FROM node:20-alpine
 
-# Dependencies
-FROM base AS deps
+# Enable Corepack to install and use pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Set the working directory inside the container
 WORKDIR /app
+
+# Copy only the package files first to leverage Docker cache
 COPY package.json pnpm-lock.yaml ./
-RUN echo "ignore-scripts=false" > .npmrc && \
-    echo 'allow-build[]=@parcel/watcher' >> .npmrc && \
-    echo 'allow-build[]=canvas' >> .npmrc && \
-    echo 'allow-build[]=esbuild' >> .npmrc && \
-    echo 'allow-build[]=tesseract.js' >> .npmrc && \
-    echo 'allow-build[]=unrs-resolver' >> .npmrc && \
-    echo 'allow-build[]=vue-demi' >> .npmrc && \
-    pnpm install --frozen-lockfile
 
-# Build
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Bypass pnpm's strict script blocking and install dependencies
+RUN pnpm config set ignore-scripts false && pnpm install --frozen-lockfile
+
+# Copy the rest of your application code
 COPY . .
-RUN pnpm build
 
-# Production
-FROM node:22-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=3000
-COPY --from=builder /app/.output ./.output
+# Build the Nuxt application for production
+RUN pnpm run build
+
+# Expose the default Nuxt port
 EXPOSE 3000
+
+# Start the built application
 CMD ["node", ".output/server/index.mjs"]
