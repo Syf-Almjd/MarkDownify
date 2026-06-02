@@ -1,21 +1,24 @@
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
-# enable corepack (pnpm comes from here)
+# Enable corepack (pnpm manager)
 RUN corepack enable
 
-# install dependencies first (cached layer)
+# Lock pnpm version (prevents random upgrades)
+RUN corepack prepare pnpm@9.12.0 --activate
+RUN corepack use pnpm@9.12.0
+
+# Copy dependency files first (better caching)
 COPY package.json pnpm-lock.yaml ./
 
-# IMPORTANT: avoid pnpm 11 breaking changes
-RUN corepack prepare pnpm@9.12.0 --activate
+# Install dependencies
 RUN pnpm install --frozen-lockfile=false
 
-# copy project
+# Copy project
 COPY . .
 
-# build Nuxt
+# Build Nuxt app
 RUN pnpm build
 
 EXPOSE 3000
