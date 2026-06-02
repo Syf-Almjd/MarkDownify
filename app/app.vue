@@ -12,7 +12,7 @@ useHead({
 })
 
 const title = 'MarkDownify - Universal File-to-Markdown Converter'
-const description = 'Transform any file (PDF, Word, Excel, PowerPoint, HTML, Images, Audio) into clean, standard Markdown completely in your browser. Fast, private, and secure.'
+const description = 'Transform any file (PDF, Word, Excel, PowerPoint, HTML, Images, Audio) into clean, standard Markdown completely in your browser. Save up to 70% of LLM tokens for GPT/Claude prompts.'
 
 useSeoMeta({
   title,
@@ -29,7 +29,10 @@ useSeoMeta({
     <!-- Premium Header -->
     <UHeader>
       <template #left>
-        <NuxtLink to="/" class="hover:opacity-90 transition-opacity">
+        <NuxtLink
+          to="/"
+          class="hover:opacity-90 transition-opacity"
+        >
           <AppLogo class="h-8 shrink-0" />
         </NuxtLink>
       </template>
