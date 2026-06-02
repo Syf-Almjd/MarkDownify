@@ -6,8 +6,15 @@ RUN corepack enable
 # Dependencies
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml .npmrc ./
-RUN pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml ./
+RUN echo "ignore-scripts=false" > .npmrc && \
+    echo 'allow-build[]=@parcel/watcher' >> .npmrc && \
+    echo 'allow-build[]=canvas' >> .npmrc && \
+    echo 'allow-build[]=esbuild' >> .npmrc && \
+    echo 'allow-build[]=tesseract.js' >> .npmrc && \
+    echo 'allow-build[]=unrs-resolver' >> .npmrc && \
+    echo 'allow-build[]=vue-demi' >> .npmrc && \
+    pnpm install --frozen-lockfile
 
 # Build
 FROM base AS builder
