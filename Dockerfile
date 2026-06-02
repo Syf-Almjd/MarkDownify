@@ -1,5 +1,5 @@
-# Use an official, lightweight Node.js image
-FROM node:20-alpine
+# Bumped to Node 22 to satisfy pnpm@latest requirements
+FROM node:22-alpine
 
 # Enable Corepack to install and use pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
