@@ -7,13 +7,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install ALL dependencies (including dev) for building
-RUN npm ci
+RUN pnpm ci
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN pnpm run build
 
 # Production stage
 FROM node:23-alpine AS runner
