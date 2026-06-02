@@ -1,8 +1,8 @@
 allowBuilds:
-  '@parcel/watcher': false
-  '@tailwindcss/oxide': false
-  canvas: false
-  esbuild: false
-  tesseract.js: false
-  unrs-resolver: false
-  vue-demi: false
+  '@parcel/watcher': true
+  '@tailwindcss/oxide': true
+  canvas: true
+  esbuild: true
+  tesseract.js: true
+  unrs-resolver: true
+  vue-demi: true

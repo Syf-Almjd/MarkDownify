@@ -2,8 +2,7 @@
 FROM node:22-alpine
 
 # Enable Corepack to install and use pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
+RUN corepack enable && corepack prepare pnpm@10.32.0 --activate
 # Set the working directory inside the container
 WORKDIR /app
 
