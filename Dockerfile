@@ -6,8 +6,8 @@ RUN corepack enable
 # Dependencies
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml .npmrc* ./
+RUN pnpm install --frozen-lockfile --config.unsafe-perm=true
 
 # Build
 FROM base AS builder
