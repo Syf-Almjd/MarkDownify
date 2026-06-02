@@ -519,6 +519,149 @@ const calculatorStats = computed(() => {
             </TransitionGroup>
           </div>
         </div>
+
+        <!-- INTERACTIVE TOKEN COST & SAVINGS ESTIMATOR CARD (Solid clean layout, adapted for left column) -->
+        <div class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl p-5 space-y-5 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+          <div class="absolute -top-24 -left-24 w-48 h-48 bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
+          <div class="flex items-center gap-3 relative z-10">
+            <div class="w-9 h-9 rounded-xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center text-primary-500 shadow-inner shrink-0">
+              <UIcon
+                name="i-lucide-calculator"
+                class="w-4.5 h-4.5 text-primary-500"
+              />
+            </div>
+            <div>
+              <h3 class="text-xs font-extrabold text-neutral-900 dark:text-white tracking-tight">
+                Token & Cost Savings Estimator
+              </h3>
+              <p class="text-[10px] text-neutral-500 dark:text-neutral-400 leading-normal">
+                Calculate prompt savings using MarkDownify formatting.
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-4 relative z-10">
+            <!-- Inputs -->
+            <div class="space-y-4 border-b border-neutral-200/60 dark:border-neutral-800/40 pb-4">
+              <!-- LLM Model Selection -->
+              <div class="space-y-1.5">
+                <label class="text-[9px] font-extrabold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
+                  Target LLM Model
+                </label>
+                <select 
+                  v-model="selectedModel"
+                  class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-950/50 text-xs font-semibold text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-500/45 transition-all cursor-pointer shadow-inner"
+                >
+                  <option 
+                    v-for="(val, key) in llmModels" 
+                    :key="key" 
+                    :value="key"
+                  >
+                    {{ val.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Monthly files slider -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs font-semibold">
+                  <span class="text-[9px] font-extrabold  uppercase tracking-wider">Monthly Files</span>
+                  <span class="font-mono font-bold text-neutral-900 dark:text-white px-2 py-0.5 rounded text-[10px]">{{ docsPerMonth }} files</span>
+                </div>
+                <input 
+                  v-model.number="docsPerMonth"
+                  type="range"
+                  min="10"
+                  max="1000"
+                  step="10"
+                  class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                />
+              </div>
+
+              <!-- Document Size Slider -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs font-semibold">
+                  <span class="text-[9px] font-extrabold uppercase tracking-wider">Avg. Document Size</span>
+                  <span class="font-mono font-bold text-neutral-900 dark:text-white  px-2 py-0.5 rounded text-[10px]">{{ avgDocSizeKb }} KB</span>
+                </div>
+                <input 
+                  v-model.number="avgDocSizeKb"
+                  type="range"
+                  min="10"
+                  max="1000"
+                  step="10"
+                  class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                />
+                <p class="text-[9px] text-neutral-400 dark:text-neutral-550 italic mt-1 font-medium">
+                  ~{{ (avgDocSizeKb * 800).toLocaleString() }} source tokens
+                </p>
+              </div>
+            </div>
+
+            <!-- Output: Token reduction bar graph representation -->
+            <div class="border border-neutral-200/65 dark:border-neutral-800/40 rounded-xl p-4 bg-neutral-50/50 dark:bg-neutral-950/20 flex flex-col justify-between space-y-3.5 shadow-inner">
+              <span class="text-[9px] font-extrabold text-neutral-450 dark:text-neutral-500 uppercase tracking-wider block">
+                Monthly Token Load
+              </span>
+              
+              <div class="space-y-3 my-1">
+                <!-- Unoptimized Row -->
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[11px] font-mono font-semibold">
+                    <span class="text-neutral-555 dark:text-neutral-400 flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-neutral-400" />
+                      Unoptimized
+                    </span>
+                    <span class="text-neutral-700 dark:text-neutral-300 font-bold">{{ (calculatorStats.originalTokens / 1000000).toFixed(1) }}M</span>
+                  </div>
+                  <div class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden shadow-inner">
+                    <div class="h-full bg-neutral-400 dark:bg-neutral-600 rounded-full w-full" />
+                  </div>
+                </div>
+
+                <!-- Optimized Row -->
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[11px] font-mono font-semibold">
+                    <span class="text-emerald-500 flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      MarkDownify
+                    </span>
+                    <span class="text-emerald-500 font-extrabold">{{ (calculatorStats.optimizedTokens / 1000000).toFixed(1) }}M</span>
+                  </div>
+                  <div class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden shadow-inner relative">
+                    <div class="h-full bg-emerald-500 rounded-full w-[30%] shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-550" />
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-[9.5px] text-neutral-550 dark:text-neutral-400 leading-relaxed pt-2 border-t border-neutral-200/50 dark:border-neutral-800/40 font-medium">
+                Saves **{{ (calculatorStats.savedTokens / 1000000).toFixed(1) }}M tokens** in prompts.
+              </p>
+            </div>
+
+            <!-- Financial cost savings payout -->
+            <div class="border border-neutral-200/60 dark:border-neutral-800/40 rounded-xl p-4 bg-emerald-500/5 border-emerald-500/10 flex flex-col justify-between relative overflow-hidden">
+              <div class="absolute -right-6 -bottom-6 text-emerald-500/10 font-bold text-7xl pointer-events-none select-none font-sans">$</div>
+              <span class="text-[9px] font-extrabold text-neutral-450 dark:text-neutral-500 uppercase tracking-wider block">
+                Cumulative Cash Saved
+              </span>
+
+              <div class="py-2.5 z-10">
+                <p class="text-3xl font-black text-emerald-500 tracking-tight filter drop-shadow-[0_0_15px_rgba(16,185,129,0.15)] leading-none">
+                  ${{ Math.round(calculatorStats.monthlySavings).toLocaleString() }}<span class="text-xs font-semibold text-neutral-550 dark:text-neutral-450">/mo</span>
+                </p>
+                <p class="text-[11px] font-bold text-neutral-700 dark:text-neutral-300 mt-2 flex items-center gap-1 leading-none">
+                  <UIcon name="i-lucide-trending-up" class="w-3.5 h-3.5 text-emerald-500" />
+                  <span>${{ Math.round(calculatorStats.annualSavings).toLocaleString() }} saved annually</span>
+                </p>
+              </div>
+
+              <div class="border-t border-neutral-200/50 dark:border-neutral-800/40 pt-2 text-[9px] text-neutral-400 dark:text-neutral-500 leading-normal font-medium z-10">
+                Based on **{{ llmModels[selectedModel]?.name || 'Claude' }}** input/output ratios.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- RIGHT COLUMN: Markdown split preview / Empty Workspace (Grid Span 8) -->
@@ -611,151 +754,6 @@ const calculatorStats = computed(() => {
             </div>
           </div>
 
-          <!-- INTERACTIVE TOKEN COST & SAVINGS CALCULATOR CARD (Ultra-Premium Tech Card) -->
-          <div class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl p-6 md:p-8 space-y-6 shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden">
-            <div class="absolute -top-24 -left-24 w-48 h-48 bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center text-primary-500 shadow-inner">
-                <UIcon
-                  name="i-lucide-calculator"
-                  class="w-5 h-5 text-primary-500"
-                />
-              </div>
-              <div>
-                <h3 class="text-base font-extrabold text-neutral-900 dark:text-white tracking-tight">
-                  Interactive Token & Cost Savings Estimator
-                </h3>
-                <p class="text-xs text-neutral-500 dark:text-neutral-400">
-                  Calculate how much money you save on LLM API tokens (GPT/Claude) using MarkDownify's squeezed formatting.
-                </p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start relative z-10">
-              <!-- Left side inputs -->
-              <div class="space-y-5 md:col-span-1 border-r border-neutral-200/60 dark:border-neutral-800/40 pr-0 md:pr-6">
-                <!-- LLM Model Selection -->
-                <div class="space-y-1.5">
-                  <label class="text-[9px] font-extrabold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
-                    Target LLM Model
-                  </label>
-                  <select 
-                    v-model="selectedModel"
-                    class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-950/50 text-xs font-semibold text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-500/45 transition-all cursor-pointer shadow-inner"
-                  >
-                    <option 
-                      v-for="(val, key) in llmModels" 
-                      :key="key" 
-                      :value="key"
-                    >
-                      {{ val.name }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Monthly documents count slider -->
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between text-xs font-semibold">
-                    <span class="text-[9px] font-extrabold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Monthly Files</span>
-                    <span class="font-mono font-bold text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-850 px-2 py-0.5 rounded text-[11px]">{{ docsPerMonth }} files</span>
-                  </div>
-                  <input 
-                    v-model.number="docsPerMonth"
-                    type="range"
-                    min="10"
-                    max="1000"
-                    step="10"
-                    class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                  />
-                </div>
-
-                <!-- Document Size Slider -->
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between text-xs font-semibold">
-                    <span class="text-[9px] font-extrabold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Avg. Document Size</span>
-                    <span class="font-mono font-bold text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-850 px-2 py-0.5 rounded text-[11px]">{{ avgDocSizeKb }} KB</span>
-                  </div>
-                  <input 
-                    v-model.number="avgDocSizeKb"
-                    type="range"
-                    min="10"
-                    max="1000"
-                    step="10"
-                    class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                  />
-                  <p class="text-[9px] text-neutral-400 dark:text-neutral-500 italic mt-1 font-medium">
-                    ~{{ (avgDocSizeKb * 800).toLocaleString() }} source tokens
-                  </p>
-                </div>
-              </div>
-
-              <!-- Right side statistics and cost output columns (solid primary backgrounds) -->
-              <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <!-- Token reduction bar graph representation -->
-                <div class="border border-neutral-200/65 dark:border-neutral-800/40 rounded-2xl p-5 bg-neutral-50/50 dark:bg-neutral-950/20 flex flex-col justify-between space-y-4 shadow-inner">
-                  <span class="text-[9px] font-extrabold text-neutral-450 dark:text-neutral-500 uppercase tracking-wider block">
-                    Monthly Token Load
-                  </span>
-                  
-                  <div class="space-y-3.5 my-2">
-                    <!-- Unoptimized Row -->
-                    <div class="space-y-1.5">
-                      <div class="flex justify-between text-xs font-mono font-semibold">
-                        <span class="text-neutral-500 flex items-center gap-1.5">
-                          <span class="w-1.5 h-1.5 rounded-full bg-neutral-400" />
-                          Unoptimized
-                        </span>
-                        <span class="text-neutral-700 dark:text-neutral-300 font-bold">{{ (calculatorStats.originalTokens / 1000000).toFixed(1) }}M <span class="text-[9px] text-neutral-400 font-sans uppercase font-normal">tokens</span></span>
-                      </div>
-                      <div class="w-full h-2.5 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden shadow-inner">
-                        <div class="h-full bg-neutral-400 dark:bg-neutral-600 rounded-full w-full" />
-                      </div>
-                    </div>
-
-                    <!-- Optimized Row -->
-                    <div class="space-y-1.5">
-                      <div class="flex justify-between text-xs font-mono font-semibold">
-                        <span class="text-emerald-500 flex items-center gap-1.5">
-                          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          MarkDownify Squeezed
-                        </span>
-                        <span class="text-emerald-500 font-extrabold">{{ (calculatorStats.optimizedTokens / 1000000).toFixed(1) }}M <span class="text-[9px] text-emerald-400 font-sans uppercase font-normal">tokens</span></span>
-                      </div>
-                      <div class="w-full h-2.5 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden shadow-inner relative">
-                        <div class="h-full bg-emerald-500 rounded-full w-[30%] shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-550" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <p class="text-[10px] text-neutral-500 dark:text-neutral-400 leading-relaxed pt-2.5 border-t border-neutral-200/50 dark:border-neutral-800/40 font-medium">
-                    Saves **{{ (calculatorStats.savedTokens / 1000000).toFixed(1) }} Million tokens** from entering LLM context prompts monthly.
-                  </p>
-                </div>
-
-                <!-- Financial cost savings payout -->
-                <div class="border border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl p-5 bg-emerald-500/5 border-emerald-500/10 flex flex-col justify-between relative overflow-hidden">
-                  <div class="absolute -right-8 -bottom-8 text-emerald-500/10 font-bold text-8xl pointer-events-none select-none font-sans">$</div>
-                  <span class="text-[9px] font-extrabold text-neutral-450 dark:text-neutral-500 uppercase tracking-wider block">
-                    Cumulative Cash Saved
-                  </span>
-
-                  <div class="py-3 z-10">
-                    <p class="text-4xl font-extrabold text-emerald-500 tracking-tight filter drop-shadow-[0_0_15px_rgba(16,185,129,0.15)] leading-none">
-                      ${{ Math.round(calculatorStats.monthlySavings).toLocaleString() }}<span class="text-sm font-semibold text-neutral-550 dark:text-neutral-450">/mo</span>
-                    </p>
-                    <p class="text-xs font-bold text-neutral-700 dark:text-neutral-300 mt-3 flex items-center gap-1.5 leading-none">
-                      <UIcon name="i-lucide-trending-up" class="w-4 h-4 text-emerald-500" />
-                      <span>${{ Math.round(calculatorStats.annualSavings).toLocaleString() }} saved annually</span>
-                    </p>
-                  </div>
-
-                  <div class="border-t border-neutral-200/50 dark:border-neutral-800/40 pt-2.5 text-[10px] text-neutral-500 dark:text-neutral-400 leading-normal font-medium z-10">
-                    Based on input/output prompt ratios for **{{ llmModels[selectedModel]?.name || 'Claude' }}** API prices.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <!-- CLAUDE CLI/DESKTOP SKILL & OPEN SOURCE SPOTLIGHT CARD (Sleek dark layout) -->
           <div class="border border-neutral-800/60 rounded-2xl p-6 md:p-8 bg-neutral-950 text-white space-y-6 shadow-lg shadow-neutral-950/20 relative overflow-hidden select-none">
@@ -778,16 +776,14 @@ const calculatorStats = computed(() => {
               </div>
 
               <!-- Button pointing to skill info -->
-              <UButton
+              <NuxtLink
                 to="https://github.com/Syf-Almjd/cli-doc2md-mcp"
                 target="_blank"
-                color="neutral"
-                variant="solid"
-                icon="i-lucide-git-branch"
-                class="font-semibold text-xs py-2 px-3 shrink-0 bg-neutral-900 border border-neutral-800 text-neutral-350 hover:text-white hover:border-neutral-700 transition-all rounded-xl cursor-pointer"
+                class="font-extrabold text-xs py-2.5 px-4 shrink-0 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700 transition-all rounded-xl cursor-pointer flex items-center gap-2 shadow-sm"
               >
+                <UIcon name="i-lucide-git-branch" class="w-4 h-4 text-emerald-400" />
                 Explore Claude MCP Skill
-              </UButton>
+              </NuxtLink>
             </div>
 
             <!-- Features description -->
