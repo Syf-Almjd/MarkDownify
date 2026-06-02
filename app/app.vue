@@ -6,11 +6,39 @@ useHead({
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
   ],
   link: [
-    { rel: 'icon', href: '/favicon.ico' }
+    { rel: 'icon', href: '/favicon.ico' },
+    { rel: 'canonical', href: 'https://markdownify.qzz.io/' }
   ],
   htmlAttrs: {
     lang: 'en'
-  }
+  },
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        'name': 'MarkDownify',
+        'alternateName': 'Token Saver Studio',
+        'url': 'https://markdownify.qzz.io/',
+        'image': 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=1200&auto=format&fit=crop&q=80',
+        'description': 'Transform any file (PDF, Word, Excel, PowerPoint, HTML, Images, Audio) into clean, standard Markdown completely in your browser. Save up to 70% of LLM tokens for GPT/Claude prompts.',
+        'applicationCategory': 'DeveloperApplication, Utility',
+        'operatingSystem': 'All',
+        'browserRequirements': 'Requires JavaScript. Requires HTML5.',
+        'creator': {
+          '@type': 'Person',
+          'name': 'SaifAlmajd',
+          'url': 'https://github.com/Syf-Almjd'
+        },
+        'offers': {
+          '@type': 'Offer',
+          'price': '0.00',
+          'priceCurrency': 'USD'
+        }
+      })
+    }
+  ]
 })
 
 const title = 'MarkDownify - Universal File-to-Markdown Converter'
@@ -21,8 +49,12 @@ useSeoMeta({
   description,
   ogTitle: title,
   ogDescription: description,
+  ogUrl: 'https://markdownify.qzz.io/',
   ogImage: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=1200&auto=format&fit=crop&q=80',
-  twitterCard: 'summary_large_image'
+  twitterCard: 'summary_large_image',
+  twitterTitle: title,
+  twitterDescription: description,
+  twitterImage: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=1200&auto=format&fit=crop&q=80'
 })
 
 // Toast system for App share/support feedback
@@ -40,7 +72,7 @@ const shareApp = async () => {
   const shareData = {
     title: 'MarkDownify',
     text: 'Convert any document into highly optimized, prompt-ready Markdown completely on-device. Save up to 70% of LLM tokens!',
-    url: 'http://markdownify.qzz.io/'
+    url: 'https://markdownify.qzz.io/'
   }
 
   if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
@@ -60,7 +92,7 @@ const shareApp = async () => {
 
 const copyToClipboard = () => {
   try {
-    navigator.clipboard.writeText('http://markdownify.qzz.io/')
+    navigator.clipboard.writeText('https://markdownify.qzz.io/')
     showToast('App link copied to clipboard!')
   } catch (err) {
     console.error('Failed to copy link:', err)
