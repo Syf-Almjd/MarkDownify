@@ -315,8 +315,8 @@ const calculatorStats = computed(() => {
           Token Saver <span class="text-primary-500">Studio</span>
         </h1>
         <p class="text-sm text-neutral-500 dark:text-neutral-400 max-w-2xl leading-relaxed">
-          Cleanly extract document content into highly optimized, prompt-ready Markdown completely on-device. 
-          Save up to **70% of LLM tokens** for massive API savings and precision prompts.
+          Convert any document into highly optimized, prompt-ready Markdown completely on-device. 
+          Save up to <strong class="font-extrabold text-neutral-900 dark:text-white">70% of LLM tokens</strong> for massive API savings and precision prompts.
         </p>
       </div>
 

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 useHead({
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
@@ -22,6 +24,49 @@ useSeoMeta({
   ogImage: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=1200&auto=format&fit=crop&q=80',
   twitterCard: 'summary_large_image'
 })
+
+// Toast system for App share/support feedback
+const toastMsg = ref<string | null>(null)
+const showToast = (msg: string) => {
+  toastMsg.value = msg
+  setTimeout(() => {
+    if (toastMsg.value === msg) {
+      toastMsg.value = null
+    }
+  }, 3000)
+}
+
+const shareApp = async () => {
+  const shareData = {
+    title: 'MarkDownify',
+    text: 'Convert any document into highly optimized, prompt-ready Markdown completely on-device. Save up to 70% of LLM tokens!',
+    url: 'http://markdownify.alaqsa.tech/'
+  }
+
+  if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+    try {
+      await navigator.share(shareData)
+      showToast('Shared successfully!')
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        console.error('Error sharing:', err)
+        copyToClipboard()
+      }
+    }
+  } else {
+    copyToClipboard()
+  }
+}
+
+const copyToClipboard = () => {
+  try {
+    navigator.clipboard.writeText('http://markdownify.alaqsa.tech/')
+    showToast('App link copied to clipboard!')
+  } catch (err) {
+    console.error('Failed to copy link:', err)
+    showToast('Failed to copy share link.')
+  }
+}
 </script>
 
 <template>
@@ -43,6 +88,29 @@ useSeoMeta({
           <div class="flex items-center gap-3">
             <!-- Light/Dark Mode Switcher -->
             <UColorModeButton class="hover:scale-105 active:scale-95 transition-transform" />
+
+            <!-- Share Button -->
+            <UButton
+              icon="i-lucide-share-2"
+              aria-label="Share MarkDownify"
+              color="neutral"
+              variant="ghost"
+              class="cursor-pointer hover:scale-105 hover:text-primary-500 active:scale-95 transition-all text-neutral-500 dark:text-neutral-400"
+              title="Share MarkDownify"
+              @click="shareApp"
+            />
+
+            <!-- Support / Sponsor Button -->
+            <UButton
+              to="https://github.com/sponsors/Syf-Almjd"
+              target="_blank"
+              icon="i-lucide-heart"
+              aria-label="Sponsor SaifAlmajd on GitHub"
+              color="neutral"
+              variant="ghost"
+              class="cursor-pointer hover:scale-105 hover:text-rose-500 active:scale-95 transition-all text-neutral-500 dark:text-neutral-400"
+              title="Sponsor & Support"
+            />
 
             <!-- Github Reference with elegant micro-hover scale -->
             <UButton
@@ -82,10 +150,37 @@ useSeoMeta({
 
         <template #right>
           <p class="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
-            © {{ new Date().getFullYear() }} MarkDownify Pro.
+            © {{ new Date().getFullYear() }} MarkDownify.
           </p>
         </template>
       </UFooter>
     </div>
+
+    <!-- Toast Notification (Zero-Gradient solid panel) -->
+    <Transition name="fade">
+      <div
+        v-if="toastMsg"
+        class="fixed bottom-6 right-6 px-4 py-3 rounded-lg border border-neutral-800 bg-neutral-900 text-white dark:border-neutral-200 dark:bg-white dark:text-neutral-900 shadow-xl text-sm font-semibold flex items-center gap-2 z-50 transition-all duration-300 select-none"
+      >
+        <UIcon
+          name="i-lucide-info"
+          class="w-4 h-4 text-primary-500"
+        />
+        {{ toastMsg }}
+      </div>
+    </Transition>
   </UApp>
 </template>
+
+<style scoped>
+/* Toast transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+</style>
