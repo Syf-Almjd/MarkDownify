@@ -668,3 +668,61 @@ export async function convertFile(
 
   return { markdown, fileType }
 }
+
+/**
+ * Interface defining rules for squeezing token sizes from markdown content
+ */
+export interface OptimizationRules {
+  stripImages: boolean
+  stripLinks: boolean
+  collapseWhitespace: boolean
+  compactTables: boolean
+}
+
+/**
+ * Squeeze additional token overhead from markdown content by stripping metadata, images, long links, or compressing formatting.
+ */
+export function optimizeMarkdownContent(markdown: string, rules: OptimizationRules): string {
+  if (!markdown) return ''
+  let optimized = markdown
+
+  // 1. Strip Images: Replace ![alt text](url) with either nothing or a short descriptive badge
+  if (rules.stripImages) {
+    // Matches ![alt](url)
+    optimized = optimized.replace(/!\[([^\]]*)\]\([^\)]+\)/g, (match, alt) => {
+      return alt ? `[Image: ${alt}]` : ''
+    })
+  }
+
+  // 2. Strip Link URLs: Replace [anchor](url) with just 'anchor' text to save massive url character limits
+  if (rules.stripLinks) {
+    // Matches [anchor](url) but NOT ![alt](url) because images are already stripped or we avoid the leading exclamation mark
+    optimized = optimized.replace(/(?<!\!)\[([^\]]+)\]\([^\)]+\)/g, '$1')
+  }
+
+  // 3. Compact Tables: Shrink markdown tables by removing unnecessary padding spaces inside cells
+  if (rules.compactTables) {
+    const lines = optimized.split('\n')
+    const processedLines = lines.map((line) => {
+      const trimmed = line.trim()
+      if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+        // It's a table row! Split by pipe, trim cells, and rejoin
+        const cells = trimmed.split('|')
+        const cleanedCells = cells.map(cell => cell.trim())
+        return cleanedCells.join('|')
+      }
+      return line
+    })
+    optimized = processedLines.join('\n')
+  }
+
+  // 4. Collapse Whitespace: Collapse multiple blank lines down to maximum 2 newlines (to save line spacing tokens)
+  if (rules.collapseWhitespace) {
+    // Replace 3 or more consecutive newlines with 2 newlines
+    optimized = optimized.replace(/\n{3,}/g, '\n\n')
+    // Remove extra trailing space on each line to save additional space
+    optimized = optimized.split('\n').map(line => line.trimEnd()).join('\n')
+  }
+
+  return optimized.trim() + '\n'
+}

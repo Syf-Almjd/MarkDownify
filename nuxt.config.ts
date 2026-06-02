@@ -9,11 +9,9 @@ export default defineNuxtConfig({
     enabled: true
   },
 
-  css: ['~/assets/css/main.css'],
+  ssr: false,
 
-  routeRules: {
-    '/': { prerender: true }
-  },
+  css: ['~/assets/css/main.css'],
 
   compatibilityDate: '2025-01-15',
 

@@ -26,55 +26,66 @@ useSeoMeta({
 
 <template>
   <UApp>
-    <!-- Premium Header -->
-    <UHeader>
-      <template #left>
-        <NuxtLink
-          to="/"
-          class="hover:opacity-90 transition-opacity"
-        >
-          <AppLogo class="h-8 shrink-0" />
-        </NuxtLink>
-      </template>
+    <!-- Background Glow Mesh Grid -->
+    <div class="bg-mesh-glow bg-neutral-50 dark:bg-neutral-950 min-h-screen flex flex-col font-sans transition-colors duration-300 relative z-0">
+      <!-- Premium Glass Header (Sticky, Translucent, Blurred) -->
+      <UHeader class="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-neutral-900/70 border-b border-neutral-200/50 dark:border-neutral-800/40 px-6 py-4 transition-all duration-300 shadow-sm">
+        <template #left>
+          <NuxtLink
+            to="/"
+            class="hover:opacity-90 active:scale-[0.98] transition-all"
+          >
+            <AppLogo class="h-8 shrink-0" />
+          </NuxtLink>
+        </template>
 
-      <template #right>
-        <!-- Light/Dark Mode Switcher -->
-        <UColorModeButton />
+        <template #right>
+          <div class="flex items-center gap-3">
+            <!-- Light/Dark Mode Switcher -->
+            <UColorModeButton class="hover:scale-105 active:scale-95 transition-transform" />
 
-        <!-- Github Reference to the original microsoft/markitdown concept -->
-        <UButton
-          to="https://github.com/microsoft/markitdown"
-          target="_blank"
-          icon="i-simple-icons-github"
-          aria-label="Original Microsoft MarkItDown GitHub"
-          color="neutral"
-          variant="ghost"
-          class="cursor-pointer"
-        />
-      </template>
-    </UHeader>
+            <!-- Github Reference with elegant micro-hover scale -->
+            <UButton
+              to="https://github.com/Syf-Almjd/cli-doc2md-mcp"
+              target="_blank"
+              icon="i-simple-icons-github"
+              aria-label="SaifAlmajd MarkDownify GitHub"
+              color="neutral"
+              variant="ghost"
+              class="cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+            />
+          </div>
+        </template>
+      </UHeader>
 
-    <!-- Main Workspace Area -->
-    <UMain class="py-6 px-4 md:py-10">
-      <NuxtPage />
-    </UMain>
+      <!-- Main Workspace Area -->
+      <UMain class="py-8 px-6 md:py-12 flex-1 relative z-10">
+        <NuxtPage />
+      </UMain>
 
-    <!-- Clean Solid Separator (Zero Gradients) -->
-    <USeparator class="border-neutral-200 dark:border-neutral-800" />
+      <!-- Premium Glass Footer -->
+      <UFooter class="px-6 py-8 border-t border-neutral-200/50 dark:border-neutral-800/40 backdrop-blur-md bg-white/40 dark:bg-neutral-950/40 relative z-10 transition-colors duration-300">
+        <template #left>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 font-medium flex items-center gap-1 flex-wrap">
+            <span>Developed by</span>
+            <NuxtLink 
+              to="https://github.com/Syf-Almjd" 
+              target="_blank" 
+              class="text-neutral-800 dark:text-neutral-200 font-bold hover:text-primary-500 dark:hover:text-primary-400 hover:underline transition-all flex items-center gap-0.5"
+            >
+              SaifAlmajd (@Syf-Almjd)
+            </NuxtLink>
+            <span class="mx-1.5">•</span>
+            <span>Zero servers. Zero tracking. 100% on-device parser.</span>
+          </p>
+        </template>
 
-    <!-- Premium Footer -->
-    <UFooter class="px-4 py-6">
-      <template #left>
-        <p class="text-xs text-neutral-500 dark:text-neutral-400">
-          MarkDownify • Inspired by Microsoft MarkItDown • Zero servers. Zero tracking. 100% on-device.
-        </p>
-      </template>
-
-      <template #right>
-        <p class="text-xs text-neutral-500 dark:text-neutral-400">
-          © {{ new Date().getFullYear() }} MarkDownify Pro.
-        </p>
-      </template>
-    </UFooter>
+        <template #right>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
+            © {{ new Date().getFullYear() }} MarkDownify Pro.
+          </p>
+        </template>
+      </UFooter>
+    </div>
   </UApp>
 </template>
