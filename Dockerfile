@@ -2,25 +2,20 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# enable pnpm
+# enable corepack (pnpm comes from here)
 RUN corepack enable
 
-# IMPORTANT: disable pnpm build approval system
-ENV PNPM_ENABLE_PRE_POST_SCRIPTS=true
-ENV PNPM_IGNORE_SCRIPTS=false
-
+# install dependencies first (cached layer)
 COPY package.json pnpm-lock.yaml ./
 
-# CRITICAL FIX: auto-approve all builds
-RUN pnpm config set enable-pre-post-scripts true
-RUN pnpm config set ignore-scripts false
-RUN pnpm config set auto-install-peers true
-RUN pnpm config set strict-peer-dependencies false
+# IMPORTANT: avoid pnpm 11 breaking changes
+RUN corepack prepare pnpm@9.12.0 --activate
+RUN pnpm install --frozen-lockfile=false
 
-RUN pnpm install
-
+# copy project
 COPY . .
 
+# build Nuxt
 RUN pnpm build
 
 EXPOSE 3000
