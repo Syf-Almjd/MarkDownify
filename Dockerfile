@@ -1,15 +1,16 @@
-# Bumped to Node 22 to satisfy pnpm@latest requirements
+# Bumped to Node 22 to satisfy modern dependencies
 FROM node:22-alpine
 
-# Enable Corepack to install and use pnpm
-RUN corepack enable && corepack prepare pnpm@10.32.0 --activate
+# Ditch corepack and forcefully install pnpm v10 directly
+RUN npm install -g pnpm@10.32.0
+
 # Set the working directory inside the container
 WORKDIR /app
 
 # Copy only the package files first to leverage Docker cache
 COPY package.json pnpm-lock.yaml ./
 
-# Install dependencies normally (it will read your new package.json whitelist)
+# Install dependencies (v10 will correctly read your package.json whitelist)
 RUN pnpm install --frozen-lockfile
 
 # Copy the rest of your application code
