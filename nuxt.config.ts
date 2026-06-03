@@ -14,14 +14,14 @@ export default defineNuxtConfig({
         { name: 'author', content: 'SaifAlmajd' },
         { name: 'robots', content: 'index, follow' },
         { name: 'theme-color', content: '#00dc82' },
-        
+
         // Open Graph / Facebook
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://markdownify.qzz.io/' },
         { property: 'og:title', content: 'MarkDownify - Universal File-to-Markdown Converter' },
         { property: 'og:description', content: 'Transform any file (PDF, Word, Excel, PowerPoint, HTML, Images, Audio) into clean, standard Markdown completely in your browser. Save up to 70% of LLM tokens for GPT/Claude prompts.' },
         { property: 'og:image', content: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=1200&auto=format&fit=crop&q=80' },
-        
+
         // Twitter
         { property: 'twitter:card', content: 'summary_large_image' },
         { property: 'twitter:url', content: 'https://markdownify.qzz.io/' },
@@ -46,7 +46,7 @@ export default defineNuxtConfig({
   },
 
   devServer: {
-    port: 3042
+    port: 3000
   },
 
   ssr: false,

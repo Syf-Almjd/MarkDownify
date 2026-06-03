@@ -102,7 +102,7 @@ Run the dev server:
 ```bash
 pnpm dev
 ```
-Open `http://localhost:3042` in your web browser. You'll be greeted by the solid Token Saver Studio dashboard!
+Open `http://localhost:3000` in your web browser. You'll be greeted by the solid Token Saver Studio dashboard!
 
 ### 3. Build for Production
 To bundle the high-performance client-side application:
