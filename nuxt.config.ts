@@ -1,5 +1,16 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+
+  modules: [
+    '@nuxt/eslint',
+    '@nuxt/ui'
+  ],
+
+  ssr: false,
+
+  devtools: {
+    enabled: true
+  },
   app: {
     head: {
       title: 'MarkDownify - Universal File-to-Markdown Converter',
@@ -36,22 +47,16 @@ export default defineNuxtConfig({
     }
   },
 
-  modules: [
-    '@nuxt/eslint',
-    '@nuxt/ui'
-  ],
+  css: ['~/assets/css/main.css'],
 
-  devtools: {
-    enabled: true
+  colorMode: {
+    preference: 'light',
+    fallback: 'light'
   },
 
   devServer: {
     port: 3000
   },
-
-  ssr: false,
-
-  css: ['~/assets/css/main.css'],
 
   compatibilityDate: '2025-01-15',
 

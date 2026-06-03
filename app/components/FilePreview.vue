@@ -238,7 +238,7 @@ const triggerDownload = () => {
         <div>
           <span class="font-extrabold text-neutral-900 dark:text-white flex items-center gap-2 text-sm md:text-base tracking-tight">
             Token Saver Engine Active
-            <span 
+            <span
               v-if="tokenSavingsPercent > 0"
               class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm"
             >
@@ -294,35 +294,35 @@ const triggerDownload = () => {
         </span>
         <div class="grid grid-cols-2 gap-x-4 gap-y-2">
           <label class="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-350 cursor-pointer select-none">
-            <input 
+            <input
               v-model="localRules.stripImages"
               type="checkbox"
               class="rounded-full border-neutral-300 dark:border-neutral-700 text-primary-500 focus:ring-primary-500/40 w-4 h-4 cursor-pointer"
-            />
+            >
             Strip Images
           </label>
           <label class="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-350 cursor-pointer select-none">
-            <input 
+            <input
               v-model="localRules.stripLinks"
               type="checkbox"
               class="rounded-full border-neutral-300 dark:border-neutral-700 text-primary-500 focus:ring-primary-500/40 w-4 h-4 cursor-pointer"
-            />
+            >
             Strip Hyperlinks
           </label>
           <label class="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-350 cursor-pointer select-none">
-            <input 
+            <input
               v-model="localRules.collapseWhitespace"
               type="checkbox"
               class="rounded-full border-neutral-300 dark:border-neutral-700 text-primary-500 focus:ring-primary-500/40 w-4 h-4 cursor-pointer"
-            />
+            >
             Collapse Whitespace
           </label>
           <label class="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-350 cursor-pointer select-none">
-            <input 
+            <input
               v-model="localRules.compactTables"
               type="checkbox"
               class="rounded-full border-neutral-300 dark:border-neutral-700 text-primary-500 focus:ring-primary-500/40 w-4 h-4 cursor-pointer"
-            />
+            >
             Compact Tables
           </label>
         </div>
@@ -335,32 +335,32 @@ const triggerDownload = () => {
         </span>
         <div class="flex flex-wrap items-center gap-x-4 gap-y-2 pt-0.5">
           <label class="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-350 cursor-pointer select-none">
-            <input 
+            <input
               v-model="xmlWrapping"
               type="checkbox"
               class="rounded-full border-neutral-300 dark:border-neutral-700 text-primary-500 focus:ring-primary-500/40 w-4 h-4 cursor-pointer"
-            />
+            >
             XML Wrap
           </label>
           <label class="flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-350 cursor-pointer select-none">
-            <input 
+            <input
               v-model="includeSystemPrompt"
               type="checkbox"
               class="rounded-full border-neutral-300 dark:border-neutral-700 text-primary-500 focus:ring-primary-500/40 w-4 h-4 cursor-pointer"
-            />
+            >
             Prepend Prompter
           </label>
-          <div 
+          <div
             v-if="xmlWrapping"
             class="flex items-center gap-1.5 text-xs ml-1 transition-all duration-300"
           >
             <span class="text-neutral-400 font-mono">&lt;</span>
-            <input 
+            <input
               v-model="wrapTagName"
               type="text"
               class="px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-950/50 text-[10px] w-28 focus:outline-none focus:ring-2 focus:ring-primary-500/40 text-neutral-800 dark:text-neutral-200 shadow-inner font-mono font-bold"
               placeholder="tag_name"
-            />
+            >
             <span class="text-neutral-400 font-mono">&gt;</span>
           </div>
         </div>
@@ -532,7 +532,6 @@ const triggerDownload = () => {
             />
             <p class="text-sm">
               No conversion logs logged
-              
             </p>
           </div>
         </div>

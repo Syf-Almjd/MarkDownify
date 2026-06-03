@@ -305,549 +305,431 @@ const calculatorStats = computed(() => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto space-y-8 font-sans">
-    <!-- Hero / Title Section (Zero-Gradient Sleek Design) -->
-    <div class="border-b border-neutral-200 dark:border-neutral-800 pb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-      <div class="space-y-2">
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-extrabold uppercase tracking-wide bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-300">
+  <div class="space-y-10 font-sans w-full">
+    <!-- 1. EMPTY STATE LAYOUT (Clean, Centered, Focused) -->
+    <div v-if="filesQueue.length === 0" class="max-w-4xl mx-auto space-y-10 py-4">
+      <!-- Centered Hero -->
+      <div class="text-center space-y-4 max-w-2xl mx-auto">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-neutral-105 dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-700 text-neutral-800 dark:text-neutral-300">
           Open-Source Workspace
         </span>
-        <h1 class="text-3xl md:text-4xl font-black tracking-tight text-neutral-900 dark:text-white">
+        <h1 class="text-4xl md:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-tight">
           Make your AI Prompts <span class="text-primary-500">Smarter</span>
         </h1>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400 max-w-2xl leading-relaxed">
+        <p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
           Convert your files into highly optimized, prompt-ready Markdown completely on-device. 
           Save up to <strong class="font-extrabold text-neutral-900 dark:text-white">70% of LLM tokens</strong> for massive API savings and precision prompts.
         </p>
       </div>
 
-      <!-- Quick Session Stats glass badge -->
-      <div 
-        v-if="completedCount > 0"
-        class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl p-4 flex items-center gap-5 shrink-0 shadow-md relative overflow-hidden"
-      >
-        <div class="absolute -top-6 -right-6 w-12 h-12 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
-        <div class="text-left">
-          <p class="font-mono font-extrabold text-emerald-500 text-base leading-none tracking-tight">
-            -{{ totalSavingsPercent }}%
-          </p>
-          <p class="text-[9px] text-neutral-500 dark:text-neutral-400 font-extrabold uppercase tracking-wider mt-1.5 leading-none">
-            Total Squeeze
+      <!-- Large Centered DropZone -->
+      <DropZone @files-selected="onFilesSelected" />
+
+      <!-- Estimator & OCR Quick Toggles inside Empty State (Simpler) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- OCR settings -->
+        <div class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl p-6 flex flex-col justify-between space-y-4">
+          <div class="space-y-1.5">
+            <h3 class="text-xs font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+              <UIcon name="i-lucide-settings" class="w-5 h-5 text-primary-500" />
+              On-Device Image OCR
+            </h3>
+            <p class="text-[11px] text-neutral-550 dark:text-neutral-450 leading-relaxed">
+              Enable local optical character recognition to automatically extract text layer details from nested images inside your documents.
+            </p>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-neutral-800/40">
+            <span class="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Enable OCR engine:</span>
+            <USwitch v-model="ocrEnabled" color="primary" aria-label="Toggle Image OCR" />
+          </div>
+        </div>
+
+        <!-- Token Estimator Quick Toggle Card -->
+        <div class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl p-6 flex flex-col justify-between space-y-4">
+          <div class="space-y-1.5">
+            <h3 class="text-xs font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+              <UIcon name="i-lucide-calculator" class="w-5 h-5 text-primary-500" />
+              Token & Cost Savings Estimator
+            </h3>
+            <p class="text-[11px] text-neutral-550 dark:text-neutral-450 leading-relaxed">
+              Calculate precisely how many prompt tokens and API expenses you will save each month by cleaning documents using MarkDownify.
+            </p>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-neutral-800/40">
+            <span class="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Show calculator pane:</span>
+            <UButton size="xs" color="neutral" variant="subtle" class="font-semibold cursor-pointer" @click="showEstimator = !showEstimator">
+              {{ showEstimator ? 'Hide Calculator' : 'Show Calculator' }}
+            </UButton>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estimator (Visible when toggled) -->
+      <Transition name="expand">
+        <div v-show="showEstimator" class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl p-6 space-y-6">
+          <div class="border-b border-neutral-200/60 dark:border-neutral-800/40 pb-4">
+            <h3 class="text-sm font-extrabold text-neutral-900 dark:text-white">Savings Calculator</h3>
+            <p class="text-xs text-neutral-500 dark:text-neutral-450">Estimate how much money and tokens you save using optimized Markdown formatting.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Selector -->
+            <div class="space-y-4">
+              <div class="space-y-1.5">
+                <label class="text-[9px] font-extrabold text-neutral-450 uppercase tracking-wider block">Target LLM Model</label>
+                <select v-model="selectedModel" class="w-full px-3 py-2 rounded-xl border border-neutral-250 dark:border-neutral-800 bg-white/50 dark:bg-neutral-950/50 text-xs font-semibold text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-500/45 transition-all cursor-pointer">
+                  <option v-for="(val, key) in llmModels" :key="key" :value="key">{{ val.name }}</option>
+                </select>
+              </div>
+              <div class="space-y-2">
+                <div class="flex justify-between text-xs font-semibold">
+                  <span class="text-[9px] font-extrabold uppercase tracking-wider">Monthly Files</span>
+                  <span class="font-mono text-neutral-900 dark:text-white">{{ docsPerMonth }} files</span>
+                </div>
+                <input v-model.number="docsPerMonth" type="range" min="10" max="1000" step="10" class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500" />
+              </div>
+              <div class="space-y-2">
+                <div class="flex justify-between text-xs font-semibold">
+                  <span class="text-[9px] font-extrabold uppercase tracking-wider">Avg Size</span>
+                  <span class="font-mono text-neutral-900 dark:text-white">{{ avgDocSizeKb }} KB</span>
+                </div>
+                <input v-model.number="avgDocSizeKb" type="range" min="10" max="1000" step="10" class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500" />
+                <p class="text-[9px] text-neutral-400 italic">~{{ (avgDocSizeKb * 800).toLocaleString() }} source tokens per doc</p>
+              </div>
+            </div>
+
+            <!-- Token Chart -->
+            <div class="border border-neutral-200/65 dark:border-neutral-800/45 rounded-xl p-4 bg-neutral-50/50 dark:bg-neutral-950/20 flex flex-col justify-between space-y-4">
+              <span class="text-[9px] font-extrabold text-neutral-450 uppercase tracking-wider block">Monthly Token Load</span>
+              <div class="space-y-3">
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[11px] font-mono font-semibold">
+                    <span class="text-neutral-500">Unoptimized</span>
+                    <span class="text-neutral-700 dark:text-neutral-300 font-bold">{{ (calculatorStats.originalTokens / 1000000).toFixed(1) }}M</span>
+                  </div>
+                  <div class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden">
+                    <div class="h-full bg-neutral-400 dark:bg-neutral-600 w-full" />
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[11px] font-mono font-semibold">
+                    <span class="text-emerald-500">MarkDownify</span>
+                    <span class="text-emerald-500 font-bold">{{ (calculatorStats.optimizedTokens / 1000000).toFixed(1) }}M</span>
+                  </div>
+                  <div class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-500 w-[30%] transition-all duration-550" />
+                  </div>
+                </div>
+              </div>
+              <p class="text-[10px] text-neutral-500 leading-normal border-t border-neutral-200/50 dark:border-neutral-800/40 pt-2">
+                Saves **{{ (calculatorStats.savedTokens / 1000000).toFixed(1) }}M tokens** monthly.
+              </p>
+            </div>
+
+            <!-- Financial Savings -->
+            <div class="border border-neutral-200/65 dark:border-neutral-800/45 rounded-xl p-4 bg-emerald-500/5 border-emerald-500/10 flex flex-col justify-between">
+              <span class="text-[9px] font-extrabold text-neutral-450 uppercase tracking-wider block">Cash Saved</span>
+              <div class="py-2">
+                <p class="text-3xl font-black text-emerald-500 leading-none">
+                  ${{ Math.round(calculatorStats.monthlySavings).toLocaleString() }}<span class="text-xs font-semibold text-neutral-550 dark:text-neutral-455">/mo</span>
+                </p>
+                <p class="text-[11px] font-bold text-neutral-700 dark:text-neutral-300 mt-2 flex items-center gap-1">
+                  <UIcon name="i-lucide-trending-up" class="w-3.5 h-3.5 text-emerald-500" />
+                  <span>${{ Math.round(calculatorStats.annualSavings).toLocaleString() }} saved annually</span>
+                </p>
+              </div>
+              <div class="border-t border-neutral-200/50 dark:border-neutral-800/40 pt-2 text-[9px] text-neutral-400">
+                Based on input/output pricing of **{{ llmModels[selectedModel]?.name }}**.
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+
+      <!-- Claude CLI/Desktop Skill card -->
+      <div class="border border-neutral-800/60 rounded-2xl p-6 md:p-8 bg-neutral-950 text-white space-y-6 shadow-lg relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none" />
+        <div class="absolute -right-24 -top-24 w-48 h-48 bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-800/80 pb-4 relative z-10">
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-emerald-500 text-neutral-950 tracking-wider">
+                NEW SKILL
+              </span>
+              <h3 class="text-base font-extrabold tracking-tight">
+                Integrate local Claude CLI / Desktop Skill
+              </h3>
+            </div>
+            <p class="text-xs text-neutral-400">
+              Allow your local Claude CLI or Claude Desktop to read complex files using the same Token-Saving parser!
+            </p>
+          </div>
+          <NuxtLink
+            to="https://github.com/Syf-Almjd/cli-doc2md-mcp"
+            target="_blank"
+            class="font-extrabold text-xs py-2.5 px-4 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700 transition-all rounded-xl cursor-pointer flex items-center gap-2"
+          >
+            <UIcon name="i-lucide-git-branch" class="w-4 h-4 text-emerald-400" />
+            Explore Claude MCP Skill
+          </NuxtLink>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left relative z-10">
+          <div class="space-y-1.5">
+            <h4 class="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
+              <UIcon name="i-lucide-terminal" class="text-primary-400 w-4.5 h-4.5" />
+              Model Context Protocol
+            </h4>
+            <p class="text-[11px] text-neutral-400 leading-relaxed font-medium">
+              Utilizes the official MCP standard. Plugs into Claude Desktop, CLI, or any MCP-enabled AI client in seconds.
+            </p>
+          </div>
+          <div class="space-y-1.5">
+            <h4 class="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
+              <UIcon name="i-lucide-folder" class="text-primary-400 w-4.5 h-4.5" />
+              Self-Contained Sub-Repo
+            </h4>
+            <p class="text-[11px] text-neutral-400 leading-relaxed font-medium">
+              Located right inside `cli-doc2md-mcp/` directory. Includes Node dependencies, parsers, and auto-configs.
+            </p>
+          </div>
+          <div class="space-y-1.5">
+            <h4 class="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
+              <UIcon name="i-lucide-code" class="text-primary-400 w-4.5 h-4.5" />
+              Browserless Extraction
+            </h4>
+            <p class="text-[11px] text-neutral-400 leading-relaxed font-medium">
+              Automatically converts local `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.epub`, and `.zip` files into optimized Markdown on CLI trigger.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-3.5 bg-neutral-900/60 rounded-xl border border-neutral-800/80 text-xs font-mono text-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 relative z-10">
+          <span class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-primary-500 animate-pulse" />
+            <span>Local directory: <span class="text-primary-400 font-bold">./cli-doc2md-mcp</span></span>
+          </span>
+          <span class="text-[9px] bg-neutral-800 px-2 py-0.5 rounded text-neutral-400 font-bold uppercase tracking-wider">100% local skill</span>
+        </div>
+      </div>
+
+      <!-- Premium Features Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="p-6 rounded-2xl bg-white/40 dark:bg-neutral-900/30 border border-neutral-200/50 dark:border-neutral-800/50 hover:-translate-y-1 hover:border-emerald-500/30 hover:shadow-md transition-all duration-300">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-4">
+            <UIcon name="i-lucide-shield-check" class="w-6 h-6" />
+          </div>
+          <h4 class="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider mb-2">
+            100% Private
+          </h4>
+          <p class="text-[11px] text-neutral-550 dark:text-neutral-450 leading-relaxed font-medium">
+            No remote backend. Files never leave your local computer. All conversion happens locally in your browser.
           </p>
         </div>
-        <div class="h-8 w-px bg-neutral-200/60 dark:bg-neutral-800/60" />
-        <div class="text-left">
-          <p class="font-mono font-extrabold text-primary-500 text-base leading-none tracking-tight">
-            {{ totalSavedTokens.toLocaleString() }}
+
+        <div class="p-6 rounded-2xl bg-white/40 dark:bg-neutral-900/30 border border-neutral-200/50 dark:border-neutral-800/50 hover:-translate-y-1 hover:border-amber-500/30 hover:shadow-md transition-all duration-300">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 mb-4">
+            <UIcon name="i-lucide-zap" class="w-6 h-6" />
+          </div>
+          <h4 class="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider mb-2">
+            Token Optimizer
+          </h4>
+          <p class="text-[11px] text-neutral-550 dark:text-neutral-450 leading-relaxed font-medium">
+            Strips metadata, formats tables, and cleans hyperlinks to save ~70% context tokens for GPT/Claude prompts.
           </p>
-          <p class="text-[9px] text-neutral-500 dark:text-neutral-400 font-extrabold uppercase tracking-wider mt-1.5 leading-none">
-            Tokens Saved
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white/40 dark:bg-neutral-900/30 border border-neutral-200/50 dark:border-neutral-800/50 hover:-translate-y-1 hover:border-indigo-500/30 hover:shadow-md transition-all duration-300">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-4">
+            <UIcon name="i-lucide-box" class="w-6 h-6" />
+          </div>
+          <h4 class="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider mb-2">
+            Multiformat
+          </h4>
+          <p class="text-[11px] text-neutral-550 dark:text-neutral-450 leading-relaxed font-medium">
+            Word documents, PDF, Excel sheets, PowerPoint presentations, EPUB, HTML, Audio transcribing & ZIP.
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Main Workspace Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      <!-- LEFT COLUMN: Uploader & File Queue List (Grid Span 4) -->
-      <div class="lg:col-span-4 space-y-6">
-        <!-- Drag & Drop Uploader Panel -->
-        <DropZone @files-selected="onFilesSelected" />
-
-        <!-- Converter Settings Card (Glassmorphic) -->
-        <div class="glass-panel border-neutral-200/60 dark:border-neutral-800/50 rounded-2xl p-5 space-y-5 shadow-sm hover:shadow-md transition-all duration-300">
-          <div class="flex items-center justify-between">
-            <h3 class="text-[10px] font-extrabold tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
-              Global Workspace Controls
-            </h3>
-
-            <button
-              v-if="filesQueue.length > 0"
-              class="text-xs font-semibold text-neutral-500 hover:text-red-500 transition-colors flex items-center gap-1 cursor-pointer"
-              @click="clearQueue"
-            >
-              <UIcon
-                name="i-lucide-trash-2"
-                class="w-3.5 h-3.5"
-              />
-              Clear Workspace
-            </button>
-          </div>
-
-          <div class="space-y-4">
-            <!-- OCR Toggler -->
-            <div class="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800/40 pb-3">
-              <div class="space-y-0.5">
-                <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-1">
-                  On-Device Image OCR
-                </span>
-                <p class="text-[10px] text-neutral-500 leading-normal">
-                  Read text inside images dynamically
-                </p>
-              </div>
-              <USwitch
-                v-model="ocrEnabled"
-                color="primary"
-                aria-label="Toggle Image OCR"
-              />
-            </div>
-
-            <!-- ZIP Bulk Downloader & Counters -->
-            <div
-              v-if="filesQueue.length > 0"
-              class="pt-1 space-y-4"
-            >
-              <div class="flex items-center justify-between text-xs font-bold text-neutral-600 dark:text-neutral-400">
-                <span>Completed Conversions:</span>
-                <span class="text-neutral-900 dark:text-white font-mono bg-neutral-100 dark:bg-neutral-850 px-2 py-0.5 rounded">{{ completedCount }} / {{ totalFiles }}</span>
-              </div>
-
-              <UButton
-                v-if="completedCount > 0"
-                color="primary"
-                variant="subtle"
-                block
-                icon="i-lucide-archive"
-                class="font-semibold cursor-pointer py-2 rounded-xl"
-                @click="downloadAllAsZip"
-              >
-                Download ZIP Package ({{ completedCount }})
-              </UButton>
-            </div>
-            <div
-              v-else
-              class="text-center py-2"
-            >
-              <p class="text-xs text-neutral-500 italic">
-                Upload files or load from history to start
-              </p>
-            </div>
-          </div>
+    <!-- 2. ACTIVE WORKSPACE LAYOUT (2-Column Grid Layout) -->
+    <div v-else class="max-w-7xl mx-auto space-y-6">
+      <!-- Session summary stats header bar (Vibrant minimal panel) -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-5">
+        <div>
+          <h2 class="text-2xl font-black text-neutral-900 dark:text-white tracking-tight">Active Conversion Workspace</h2>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400">Upload documents and review on-device parsed Markdown details.</p>
         </div>
-
-        <!-- File List Queue Pane (Solid border, scrollable) -->
-        <div
-          v-if="filesQueue.length > 0"
-          class="space-y-3"
-        >
-          <h3 class="text-[10px] font-extrabold tracking-wider text-neutral-400 dark:text-neutral-500 uppercase px-1">
-            Workspace History ({{ filesQueue.length }})
-          </h3>
-
-          <div class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-            <TransitionGroup name="list">
-              <div
-                v-for="item in filesQueue"
-                :key="item.id"
-                class="flex items-center gap-3.5 p-3.5 rounded-xl border text-left transition-all duration-300 select-none cursor-pointer"
-                :class="[
-                  selectedFileId === item.id
-                    ? 'border-primary-500 bg-primary-500/5 dark:bg-primary-500/5 shadow-md shadow-primary-500/5 ring-1 ring-primary-500/30'
-                    : 'glass-panel border-neutral-200/60 dark:border-neutral-800/50 hover:border-neutral-350 dark:hover:border-neutral-700/80 hover:shadow-md hover:-translate-y-0.5'
-                ]"
-                @click="selectedFileId = item.id"
-              >
-                <!-- Status icon indicator with vibrant halos -->
-                <div class="shrink-0">
-                  <div 
-                    class="w-8.5 h-8.5 rounded-xl flex items-center justify-center border text-neutral-500 transition-colors duration-300"
-                    :class="[
-                      item.status === 'done' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                      item.status === 'processing' ? 'bg-primary-500/15 border-primary-500/25 text-primary-500 pulse-glow' :
-                      item.status === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                      'bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-400'
-                    ]"
-                  >
-                    <UIcon
-                      v-if="item.status === 'processing'"
-                      name="i-lucide-loader-2"
-                      class="w-4.5 h-4.5 animate-spin"
-                    />
-                    <UIcon
-                      v-else-if="item.status === 'done'"
-                      name="i-lucide-check"
-                      class="w-4.5 h-4.5"
-                    />
-                    <UIcon
-                      v-else-if="item.status === 'error'"
-                      name="i-lucide-alert-circle"
-                      class="w-4.5 h-4.5"
-                    />
-                    <UIcon
-                      v-else
-                      name="i-lucide-clock"
-                      class="w-4.5 h-4.5 opacity-60"
-                    />
-                  </div>
-                </div>
-
-                <!-- Info detail -->
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-semibold text-neutral-900 dark:text-white truncate">
-                    {{ item.name }}
-                  </p>
-                  <p class="text-[10px] text-neutral-500 truncate mt-0.5 font-medium">
-                    {{ item.status === 'processing' ? item.progressMsg : item.fileTypeLabel }}
-                  </p>
-                </div>
-
-                <!-- Actions (Delete or Download) -->
-                <div class="flex items-center gap-1.5">
-                  <button
-                    v-if="item.status === 'done'"
-                    class="p-1 rounded-lg text-neutral-400 hover:text-primary-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all cursor-pointer"
-                    title="Download Markdown"
-                    @click.stop="downloadSingleFile(item)"
-                  >
-                    <UIcon
-                      name="i-lucide-download"
-                      class="w-4 h-4"
-                    />
-                  </button>
-
-                  <button
-                    class="p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all cursor-pointer"
-                    title="Remove from queue"
-                    @click.stop="removeFile(item.id)"
-                  >
-                    <UIcon
-                      name="i-lucide-x"
-                      class="w-4 h-4"
-                    />
-                  </button>
-                </div>
-              </div>
-            </TransitionGroup>
-          </div>
-        </div>
-
-        <!-- INTERACTIVE TOKEN COST & SAVINGS ESTIMATOR CARD (Solid clean layout, adapted for left column) -->
-        <div class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl p-5 space-y-5 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
-          <div class="absolute -top-24 -left-24 w-48 h-48 bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
-          
-          <!-- Collapsible Header -->
-          <div 
-            class="flex items-center justify-between gap-3 relative z-10 cursor-pointer select-none group/est"
-            @click="showEstimator = !showEstimator"
-          >
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center text-primary-500 shadow-inner shrink-0 group-hover/est:scale-105 transition-transform duration-300">
-                <UIcon
-                  name="i-lucide-calculator"
-                  class="w-4.5 h-4.5 text-primary-500"
-                />
-              </div>
-              <div>
-                <h3 class="text-xs font-extrabold text-neutral-900 dark:text-white tracking-tight flex items-center gap-1.5">
-                  Token & Cost Savings Estimator
-                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/25 font-bold uppercase tracking-wide">
-                    Calc
-                  </span>
-                </h3>
-                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 leading-normal">
-                  Calculate prompt savings using MarkDownify formatting.
-                </p>
-              </div>
+        <div class="flex items-center gap-4">
+          <!-- Stats badges -->
+          <div class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-xl px-4 py-2 flex items-center gap-4 shadow-sm text-xs">
+            <div>
+              <span class="text-[9px] font-extrabold text-neutral-450 uppercase block">Total Squeeze</span>
+              <span class="font-mono font-bold text-emerald-500 text-sm">-{{ totalSavingsPercent }}%</span>
             </div>
-            
-            <div class="p-1 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors">
-              <UIcon
-                :name="showEstimator ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-                class="w-5 h-5 transition-transform duration-300"
-              />
+            <div class="h-6 w-px bg-neutral-200 dark:bg-neutral-800" />
+            <div>
+              <span class="text-[9px] font-extrabold text-neutral-450 uppercase block">Saved Tokens</span>
+              <span class="font-mono font-bold text-primary-500 text-sm">{{ totalSavedTokens.toLocaleString() }}</span>
             </div>
           </div>
-
-          <!-- Collapsible Content Body -->
-          <Transition name="expand">
-            <div v-show="showEstimator" class="space-y-4 relative z-10 pt-4 border-t border-neutral-100 dark:border-neutral-800/40">
-              <!-- Inputs -->
-              <div class="space-y-4 border-b border-neutral-200/60 dark:border-neutral-800/40 pb-4">
-                <!-- LLM Model Selection -->
-                <div class="space-y-1.5">
-                  <label class="text-[9px] font-extrabold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
-                    Target LLM Model
-                  </label>
-                  <select 
-                    v-model="selectedModel"
-                    class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-950/50 text-xs font-semibold text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-500/45 transition-all cursor-pointer shadow-inner"
-                  >
-                    <option 
-                      v-for="(val, key) in llmModels" 
-                      :key="key" 
-                      :value="key"
-                    >
-                      {{ val.name }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Monthly files slider -->
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between text-xs font-semibold">
-                    <span class="text-[9px] font-extrabold uppercase tracking-wider">Monthly Files</span>
-                    <span class="font-mono font-bold text-neutral-900 dark:text-white px-2 py-0.5 rounded text-[10px]">{{ docsPerMonth }} files</span>
-                  </div>
-                  <input 
-                    v-model.number="docsPerMonth"
-                    type="range"
-                    min="10"
-                    max="1000"
-                    step="10"
-                    class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                  />
-                </div>
-
-                <!-- Document Size Slider -->
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between text-xs font-semibold">
-                    <span class="text-[9px] font-extrabold uppercase tracking-wider">Avg. Document Size</span>
-                    <span class="font-mono font-bold text-neutral-900 dark:text-white px-2 py-0.5 rounded text-[10px]">{{ avgDocSizeKb }} KB</span>
-                  </div>
-                  <input 
-                    v-model.number="avgDocSizeKb"
-                    type="range"
-                    min="10"
-                    max="1000"
-                    step="10"
-                    class="custom-slider w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary-500"
-                  />
-                  <p class="text-[9px] text-neutral-400 dark:text-neutral-550 italic mt-1 font-medium">
-                    ~{{ (avgDocSizeKb * 800).toLocaleString() }} source tokens
-                  </p>
-                </div>
-              </div>
-
-              <!-- Output: Token reduction bar graph representation -->
-              <div class="border border-neutral-200/65 dark:border-neutral-800/40 rounded-xl p-4 bg-neutral-50/50 dark:bg-neutral-950/20 flex flex-col justify-between space-y-3.5 shadow-inner">
-                <span class="text-[9px] font-extrabold text-neutral-450 dark:text-neutral-500 uppercase tracking-wider block">
-                  Monthly Token Load
-                </span>
-                
-                <div class="space-y-3 my-1">
-                  <!-- Unoptimized Row -->
-                  <div class="space-y-1">
-                    <div class="flex justify-between text-[11px] font-mono font-semibold">
-                      <span class="text-neutral-555 dark:text-neutral-400 flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-400" />
-                        Unoptimized
-                      </span>
-                      <span class="text-neutral-700 dark:text-neutral-300 font-bold">{{ (calculatorStats.originalTokens / 1000000).toFixed(1) }}M</span>
-                    </div>
-                    <div class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden shadow-inner">
-                      <div class="h-full bg-neutral-400 dark:bg-neutral-600 rounded-full w-full" />
-                    </div>
-                  </div>
-
-                  <!-- Optimized Row -->
-                  <div class="space-y-1">
-                    <div class="flex justify-between text-[11px] font-mono font-semibold">
-                      <span class="text-emerald-500 flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        MarkDownify
-                      </span>
-                      <span class="text-emerald-500 font-extrabold">{{ (calculatorStats.optimizedTokens / 1000000).toFixed(1) }}M</span>
-                    </div>
-                    <div class="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden shadow-inner relative">
-                      <div class="h-full bg-emerald-500 rounded-full w-[30%] shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-550" />
-                    </div>
-                  </div>
-                </div>
-
-                <p class="text-[9.5px] text-neutral-550 dark:text-neutral-400 leading-relaxed pt-2 border-t border-neutral-200/50 dark:border-neutral-800/40 font-medium">
-                  Saves **{{ (calculatorStats.savedTokens / 1000000).toFixed(1) }}M tokens** in prompts.
-                </p>
-              </div>
-
-              <!-- Financial cost savings payout -->
-              <div class="border border-neutral-200/60 dark:border-neutral-800/40 rounded-xl p-4 bg-emerald-500/5 border-emerald-500/10 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute -right-6 -bottom-6 text-emerald-500/10 font-bold text-7xl pointer-events-none select-none font-sans">$</div>
-                <span class="text-[9px] font-extrabold text-neutral-450 dark:text-neutral-500 uppercase tracking-wider block">
-                  Cumulative Cash Saved
-                </span>
-
-                <div class="py-2.5 z-10">
-                  <p class="text-3xl font-black text-emerald-500 tracking-tight filter drop-shadow-[0_0_15px_rgba(16,185,129,0.15)] leading-none">
-                    ${{ Math.round(calculatorStats.monthlySavings).toLocaleString() }}<span class="text-xs font-semibold text-neutral-550 dark:text-neutral-450">/mo</span>
-                  </p>
-                  <p class="text-[11px] font-bold text-neutral-700 dark:text-neutral-300 mt-2 flex items-center gap-1 leading-none">
-                    <UIcon name="i-lucide-trending-up" class="w-3.5 h-3.5 text-emerald-500" />
-                    <span>${{ Math.round(calculatorStats.annualSavings).toLocaleString() }} saved annually</span>
-                  </p>
-                </div>
-
-                <div class="border-t border-neutral-200/50 dark:border-neutral-800/40 pt-2 text-[9px] text-neutral-400 dark:text-neutral-550 leading-normal font-medium z-10">
-                  Based on **{{ llmModels[selectedModel]?.name || 'Claude' }}** input/output ratios.
-                </div>
-              </div>
-            </div>
-          </Transition>
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: Markdown split preview / Empty Workspace (Grid Span 8) -->
-      <div class="lg:col-span-8 h-full">
-        <!-- Render file workspace details -->
-        <FilePreview
-          v-if="selectedFile"
-          :file-name="selectedFile.name"
-          :file-size="selectedFile.size"
-          :file-type="selectedFile.fileTypeLabel"
-          :markdown="selectedFile.markdown"
-          :logs="selectedFile.logs"
-          :status="selectedFile.status"
-          @download="(content) => downloadSingleFile(selectedFile!, content)"
-        />
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- LEFT COLUMN: Sidebar controls and list (Span 4) -->
+        <div class="lg:col-span-4 space-y-6">
+          <!-- Compact Drag & Drop -->
+          <DropZone compact @files-selected="onFilesSelected" />
 
-        <!-- Render gorgeous empty workspace layout (Token savings calculator & Open source community card) -->
-        <div
-          v-else
-          class="space-y-8"
-        >
-          <!-- Empty Workspace Hero -->
-          <div
-            class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-3xl p-10 md:p-14 text-center flex flex-col items-center justify-center min-h-[300px] shadow-lg relative overflow-hidden"
-          >
-            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
-            <div class="w-18 h-18 rounded-2xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center text-primary-500 mb-6 shadow-md shadow-primary-500/5 animate-float">
-              <UIcon
-                name="i-lucide-code-2"
-                class="w-9 h-9"
-              />
+          <!-- Workspace controls card -->
+          <div class="glass-panel border-neutral-200/60 dark:border-neutral-800/50 rounded-2xl p-5 space-y-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <h3 class="text-[10px] font-extrabold tracking-wider text-neutral-450 uppercase">Global Controls</h3>
+              <button class="text-xs font-semibold text-neutral-500 hover:text-red-500 transition-colors flex items-center gap-1 cursor-pointer" @click="clearQueue">
+                <UIcon name="i-lucide-trash-2" class="w-3.5 h-3.5" />
+                Clear All
+              </button>
             </div>
-
-            <div class="max-w-md space-y-2.5 mb-10">
-              <h2 class="text-2xl font-black text-neutral-900 dark:text-white tracking-tight">
-                Workspace Empty
-              </h2>
-              <p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                Drag and drop documents to the upload zone on the left. The optimized Markdown workspace will load instantly. 
-                Everything is parsed safely on-device in your browser.
-              </p>
-            </div>
-
-            <!-- Premium Feature Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-3xl text-left relative z-10">
-              <div class="p-5 rounded-2xl bg-white/40 dark:bg-neutral-900/30 border border-neutral-200/50 dark:border-neutral-800/50 hover:-translate-y-1 hover:border-emerald-500/30 hover:shadow-md transition-all duration-300">
-                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-3.5">
-                  <UIcon
-                    name="i-lucide-shield-check"
-                    class="w-5 h-5"
-                  />
+            
+            <div class="space-y-3.5 pt-1">
+              <!-- OCR Toggle -->
+              <div class="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800/40 pb-2.5">
+                <div class="space-y-0.5">
+                  <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">On-Device OCR</span>
+                  <p class="text-[9px] text-neutral-500 leading-normal">Read image text dynamically</p>
                 </div>
-                <h4 class="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider mb-1.5">
-                  100% Private
-                </h4>
-                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-                  No remote backend. Files never leave your local computer.
-                </p>
+                <USwitch v-model="ocrEnabled" color="primary" aria-label="Toggle Image OCR" />
               </div>
 
-              <div class="p-5 rounded-2xl bg-white/40 dark:bg-neutral-900/30 border border-neutral-200/50 dark:border-neutral-800/50 hover:-translate-y-1 hover:border-amber-500/30 hover:shadow-md transition-all duration-300">
-                <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 mb-3.5">
-                  <UIcon
-                    name="i-lucide-zap"
-                    class="w-5 h-5"
-                  />
-                </div>
-                <h4 class="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider mb-1.5">
-                  Token Optimizer
-                </h4>
-                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-                  Strips metadata, formats tables, and cleans hyperlinks to save ~70% context tokens.
-                </p>
+              <!-- ZIP Downloader -->
+              <div class="flex items-center justify-between text-xs font-semibold text-neutral-600 dark:text-neutral-450">
+                <span>Completed:</span>
+                <span class="font-mono text-neutral-900 dark:text-white font-bold bg-neutral-100 dark:bg-neutral-850 px-2 py-0.5 rounded">{{ completedCount }} / {{ totalFiles }}</span>
               </div>
-
-              <div class="p-5 rounded-2xl bg-white/40 dark:bg-neutral-900/30 border border-neutral-200/50 dark:border-neutral-800/50 hover:-translate-y-1 hover:border-indigo-500/30 hover:shadow-md transition-all duration-300">
-                <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-3.5">
-                  <UIcon
-                    name="i-lucide-box"
-                    class="w-5 h-5"
-                  />
-                </div>
-                <h4 class="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider mb-1.5">
-                  Multiformat
-                </h4>
-                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-                  Word, PDF, Excel sheets, PPTX, EPUB, HTML, Audio & Zip.
-                </p>
-              </div>
+              <UButton v-if="completedCount > 0" color="primary" variant="subtle" block icon="i-lucide-archive" class="font-semibold cursor-pointer py-2 rounded-xl" @click="downloadAllAsZip">
+                Download ZIP ({{ completedCount }})
+              </UButton>
             </div>
           </div>
 
-
-          <!-- CLAUDE CLI/DESKTOP SKILL & OPEN SOURCE SPOTLIGHT CARD (Sleek dark layout) -->
-          <div class="border border-neutral-800/60 rounded-2xl p-6 md:p-8 bg-neutral-950 text-white space-y-6 shadow-lg shadow-neutral-950/20 relative overflow-hidden select-none">
-            <!-- Simulated grid scanlines in the background -->
-            <div class="absolute inset-0 bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none" />
-            <div class="absolute -right-24 -top-24 w-48 h-48 bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-800/80 pb-4 relative z-10">
-              <div class="space-y-1.5">
-                <div class="flex items-center gap-2">
-                  <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-emerald-500 text-neutral-950 tracking-wider">
-                    NEW SKILL
-                  </span>
-                  <h3 class="text-base font-extrabold tracking-tight">
-                    Integrate local Claude CLI / Desktop Skill
-                  </h3>
+          <!-- Queue List -->
+          <div class="space-y-2.5">
+            <h3 class="text-[10px] font-extrabold tracking-wider text-neutral-400 uppercase px-1">Workspace List ({{ filesQueue.length }})</h3>
+            <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+              <TransitionGroup name="list">
+                <div
+                  v-for="item in filesQueue"
+                  :key="item.id"
+                  class="flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-300 select-none cursor-pointer"
+                  :class="[
+                    selectedFileId === item.id
+                      ? 'border-primary-500 bg-primary-500/5 dark:bg-primary-500/5 shadow-md shadow-primary-500/5 ring-1 ring-primary-500/30'
+                      : 'glass-panel border-neutral-200/60 dark:border-neutral-800/50 hover:border-neutral-350 dark:hover:border-neutral-700/80 hover:shadow-md hover:-translate-y-0.5'
+                  ]"
+                  @click="selectedFileId = item.id"
+                >
+                  <div class="shrink-0">
+                    <div 
+                      class="w-8 h-8 rounded-lg flex items-center justify-center border text-neutral-500 transition-colors duration-300"
+                      :class="[
+                        item.status === 'done' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                        item.status === 'processing' ? 'bg-primary-500/15 border-primary-500/25 text-primary-500 pulse-glow' :
+                        item.status === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                        'bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-400'
+                      ]"
+                    >
+                      <UIcon v-if="item.status === 'processing'" name="i-lucide-loader-2" class="w-4 h-4 animate-spin" />
+                      <UIcon v-else-if="item.status === 'done'" name="i-lucide-check" class="w-4 h-4" />
+                      <UIcon v-else-if="item.status === 'error'" name="i-lucide-alert-circle" class="w-4 h-4" />
+                      <UIcon v-else name="i-lucide-clock" class="w-4 h-4 opacity-60" />
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-neutral-900 dark:text-white truncate">{{ item.name }}</p>
+                    <p class="text-[9px] text-neutral-550 truncate font-medium mt-0.5">
+                      {{ item.status === 'processing' ? item.progressMsg : item.fileTypeLabel }}
+                    </p>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <button v-if="item.status === 'done'" class="p-1 rounded text-neutral-400 hover:text-primary-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all cursor-pointer" title="Download Markdown" @click.stop="downloadSingleFile(item)">
+                      <UIcon name="i-lucide-download" class="w-3.5 h-3.5" />
+                    </button>
+                    <button class="p-1 rounded text-neutral-400 hover:text-red-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all cursor-pointer" title="Remove" @click.stop="removeFile(item.id)">
+                      <UIcon name="i-lucide-x" class="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <p class="text-xs text-neutral-400">
-                  Allow your local Claude CLI or Claude Desktop to read complex files using the same Token-Saving parser!
-                </p>
-              </div>
-
-              <!-- Button pointing to skill info -->
-              <NuxtLink
-                to="https://github.com/Syf-Almjd/cli-doc2md-mcp"
-                target="_blank"
-                class="font-extrabold text-xs py-2.5 px-4 shrink-0 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700 transition-all rounded-xl cursor-pointer flex items-center gap-2 shadow-sm"
-              >
-                <UIcon name="i-lucide-git-branch" class="w-4 h-4 text-emerald-400" />
-                Explore Claude MCP Skill
-              </NuxtLink>
+              </TransitionGroup>
             </div>
+          </div>
 
-            <!-- Features description -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left relative z-10">
-              <div class="space-y-1.5">
-                <h4 class="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
-                  <UIcon name="i-lucide-terminal" class="text-primary-400 w-4.5 h-4.5" />
-                  Model Context Protocol
-                </h4>
-                <p class="text-[11px] text-neutral-400 leading-relaxed font-medium">
-                  Utilizes the official MCP standard. Plugs into Claude Desktop, CLI, or any MCP-enabled AI client in seconds.
-                </p>
+          <!-- Collapsible Estimator -->
+          <div class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl p-4 space-y-4 shadow-sm">
+            <div class="flex items-center justify-between cursor-pointer select-none group/est" @click="showEstimator = !showEstimator">
+              <div class="flex items-center gap-2.5">
+                <UIcon name="i-lucide-calculator" class="w-4 h-4 text-primary-500" />
+                <span class="text-xs font-bold text-neutral-900 dark:text-white">Savings Estimator</span>
               </div>
-
-              <div class="space-y-1.5">
-                <h4 class="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
-                  <UIcon name="i-lucide-folder" class="text-primary-400 w-4.5 h-4.5" />
-                  Self-Contained Sub-Repo
-                </h4>
-                <p class="text-[11px] text-neutral-400 leading-relaxed font-medium">
-                  Located right inside `cli-doc2md-mcp/` directory. Includes Node dependencies, parsers, and auto-configs.
-                </p>
-              </div>
-
-              <div class="space-y-1.5">
-                <h4 class="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
-                  <UIcon name="i-lucide-code" class="text-primary-400 w-4.5 h-4.5" />
-                  Browserless Extraction
-                </h4>
-                <p class="text-[11px] text-neutral-400 leading-relaxed font-medium">
-                  Automatically converts local `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.epub`, and `.zip` files into optimized Markdown on CLI trigger.
-                </p>
-              </div>
+              <UIcon :name="showEstimator ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'" class="w-4 h-4 text-neutral-400" />
             </div>
+            <Transition name="expand">
+              <div v-show="showEstimator" class="space-y-4 pt-3 border-t border-neutral-100 dark:border-neutral-800/40">
+                <div class="space-y-1.5">
+                  <label class="text-[9px] font-extrabold text-neutral-450 uppercase tracking-wider block">LLM Model</label>
+                  <select v-model="selectedModel" class="w-full px-2 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-950/50 text-xs font-medium text-neutral-800 dark:text-neutral-200 focus:outline-none">
+                    <option v-for="(val, key) in llmModels" :key="key" :value="key">{{ val.name }}</option>
+                  </select>
+                </div>
+                <div class="space-y-1.5">
+                  <div class="flex justify-between text-xs">
+                    <span class="text-[9px] uppercase tracking-wider font-semibold">Monthly Files</span>
+                    <span class="font-mono font-bold">{{ docsPerMonth }}</span>
+                  </div>
+                  <input v-model.number="docsPerMonth" type="range" min="10" max="1000" step="10" class="custom-slider w-full h-1 rounded-lg appearance-none cursor-pointer accent-primary-500" />
+                </div>
+                <div class="space-y-1.5">
+                  <div class="flex justify-between text-xs">
+                    <span class="text-[9px] uppercase tracking-wider font-semibold">Avg size</span>
+                    <span class="font-mono font-bold">{{ avgDocSizeKb }} KB</span>
+                  </div>
+                  <input v-model.number="avgDocSizeKb" type="range" min="10" max="1000" step="10" class="custom-slider w-full h-1 rounded-lg appearance-none cursor-pointer accent-primary-500" />
+                </div>
+                <div class="p-3 bg-neutral-50 dark:bg-neutral-950/20 border border-neutral-200/50 dark:border-neutral-800/40 rounded-xl space-y-2">
+                  <div class="flex justify-between text-[10px] font-semibold">
+                    <span class="text-neutral-550">Unoptimized:</span>
+                    <span class="text-neutral-800 dark:text-neutral-200 font-bold font-mono">{{ (calculatorStats.originalTokens / 1000000).toFixed(1) }}M tokens</span>
+                  </div>
+                  <div class="flex justify-between text-[10px] font-semibold">
+                    <span class="text-emerald-500">MarkDownify:</span>
+                    <span class="text-emerald-500 font-bold font-mono">{{ (calculatorStats.optimizedTokens / 1000000).toFixed(1) }}M tokens</span>
+                  </div>
+                  <div class="flex justify-between text-[10px] font-semibold border-t border-neutral-200/50 dark:border-neutral-800/40 pt-1.5">
+                    <span class="text-neutral-800 dark:text-neutral-200">Cash Saved:</span>
+                    <span class="text-emerald-500 font-black font-mono">${{ Math.round(calculatorStats.monthlySavings).toLocaleString() }}/mo</span>
+                  </div>
+                </div>
+              </div>
+            </Transition>
+          </div>
+        </div>
 
-            <!-- Highlight terminal instructions -->
-            <div class="p-3.5 bg-neutral-900/60 rounded-xl border border-neutral-800/80 text-xs font-mono text-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 relative z-10">
-              <span class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-primary-500 animate-pulse" />
-                <span>Local directory: <span class="text-primary-400 font-bold">./cli-doc2md-mcp</span></span>
-              </span>
-              <span class="text-[9px] bg-neutral-800 px-2 py-0.5 rounded text-neutral-400 font-bold uppercase tracking-wider self-start sm:self-auto">100% local skill</span>
-            </div>
+        <!-- RIGHT COLUMN: Preview pane (Span 8) -->
+        <div class="lg:col-span-8 h-full">
+          <FilePreview
+            v-if="selectedFile"
+            :file-name="selectedFile.name"
+            :file-size="selectedFile.size"
+            :file-type="selectedFile.fileTypeLabel"
+            :markdown="selectedFile.markdown"
+            :logs="selectedFile.logs"
+            :status="selectedFile.status"
+            @download="(content) => downloadSingleFile(selectedFile!, content)"
+          />
+          <div v-else class="glass-panel border-neutral-200/60 dark:border-neutral-800/40 rounded-3xl p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+            <UIcon name="i-lucide-file-text" class="w-12 h-12 text-neutral-450 mb-4 animate-pulse" />
+            <h3 class="text-lg font-bold text-neutral-900 dark:text-white mb-2">No file selected</h3>
+            <p class="text-xs text-neutral-550 max-w-sm">Select a document from the workspace sidebar list to preview its parsed Markdown result and execution logs.</p>
           </div>
         </div>
       </div>

@@ -18,7 +18,7 @@
           stroke-linejoin="round"
           class="opacity-60 group-hover/logo:opacity-30 transition-opacity duration-300"
         />
-        
+
         <!-- The Page Fold Corner -->
         <path
           d="M14 4V8.5H18.5"

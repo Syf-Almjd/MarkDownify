@@ -79,9 +79,10 @@ const shareApp = async () => {
     try {
       await navigator.share(shareData)
       showToast('Shared successfully!')
-    } catch (err: any) {
-      if (err.name !== 'AbortError') {
-        console.error('Error sharing:', err)
+    } catch (err) {
+      const error = err as Error
+      if (error.name !== 'AbortError') {
+        console.error('Error sharing:', error)
         copyToClipboard()
       }
     }
@@ -106,17 +107,15 @@ const copyToClipboard = () => {
     <!-- Background Glow Mesh Grid -->
     <div class="bg-mesh-glow bg-neutral-50 dark:bg-neutral-950 min-h-screen flex flex-col font-sans transition-colors duration-300 relative z-0">
       <!-- Premium Glass Header (Sticky, Translucent, Blurred) -->
-      <UHeader class="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-neutral-900/70 border-b border-neutral-200/50 dark:border-neutral-800/40 px-6 py-4 transition-all duration-300 shadow-sm">
-        <template #left>
+      <header class="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-neutral-900/70 border-b border-neutral-200/50 dark:border-neutral-800/40 w-full transition-all duration-300 shadow-sm">
+        <div class="max-w-7xl mx-auto flex items-center justify-between py-4 pl-0 pr-6 md:pr-8">
           <NuxtLink
             to="/"
             class="hover:opacity-90 active:scale-[0.98] transition-all"
           >
             <AppLogo class="h-8 shrink-0" />
           </NuxtLink>
-        </template>
 
-        <template #right>
           <div class="flex items-center gap-3">
             <!-- Light/Dark Mode Switcher -->
             <UColorModeButton class="hover:scale-105 active:scale-95 transition-transform" />
@@ -155,22 +154,22 @@ const copyToClipboard = () => {
               class="cursor-pointer hover:scale-105 active:scale-95 transition-transform"
             />
           </div>
-        </template>
-      </UHeader>
+        </div>
+      </header>
 
       <!-- Main Workspace Area -->
-      <UMain class="py-8 px-6 md:py-12 flex-1 relative z-10">
+      <main class="py-8 px-6 md:py-12 flex-1 relative z-10 w-full max-w-7xl mx-auto">
         <NuxtPage />
-      </UMain>
+      </main>
 
       <!-- Premium Glass Footer -->
-      <UFooter class="px-6 py-8 border-t border-neutral-200/50 dark:border-neutral-800/40 backdrop-blur-md bg-white/40 dark:bg-neutral-950/40 relative z-10 transition-colors duration-300">
-        <template #left>
+      <footer class="border-t border-neutral-200/50 dark:border-neutral-800/40 backdrop-blur-md bg-white/40 dark:bg-neutral-950/40 relative z-10 transition-colors duration-300 py-8 px-6 md:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <p class="text-xs text-neutral-500 dark:text-neutral-400 font-medium flex items-center gap-1 flex-wrap">
             <span>Developed by</span>
-            <NuxtLink 
-              to="https://github.com/Syf-Almjd" 
-              target="_blank" 
+            <NuxtLink
+              to="https://github.com/Syf-Almjd"
+              target="_blank"
               class="text-neutral-800 dark:text-neutral-200 font-bold hover:text-primary-500 dark:hover:text-primary-400 hover:underline transition-all flex items-center gap-0.5"
             >
               SaifAlmajd (@Syf-Almjd)
@@ -178,14 +177,11 @@ const copyToClipboard = () => {
             <span class="mx-1.5">•</span>
             <span>Zero servers. Zero tracking. 100% on-device parser.</span>
           </p>
-        </template>
-
-        <template #right>
           <p class="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
             © {{ new Date().getFullYear() }} MarkDownify.
           </p>
-        </template>
-      </UFooter>
+        </div>
+      </footer>
     </div>
 
     <!-- Toast Notification (Zero-Gradient solid panel) -->
