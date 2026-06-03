@@ -1,6 +1,0 @@
-[phases.install]
-# Nuke the cached modules/lockfile, then install with a flattened folder structure
-cmds = [
-    "rm -rf node_modules pnpm-lock.yaml",
-    "pnpm install --config.node-linker=hoisted"
-]
