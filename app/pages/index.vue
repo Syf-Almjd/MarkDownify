@@ -24,6 +24,38 @@ const isProcessing = ref(false)
 const ocrEnabled = ref(false)
 const showEstimator = ref(false)
 
+// First Download Engagement Modal State
+const showSuccessModal = ref(false)
+const isMac = ref(false)
+const deferredPrompt = ref<any>(null)
+const isPwaInstallable = ref(false)
+
+const handleDownloadTrigger = () => {
+  if (typeof window !== 'undefined') {
+    const hasDownloadedBefore = localStorage.getItem('markdownify_first_download_done')
+    if (!hasDownloadedBefore) {
+      localStorage.setItem('markdownify_first_download_done', 'true')
+      setTimeout(() => {
+        showSuccessModal.value = true
+      }, 800)
+    }
+  }
+}
+
+const installPwaApp = async () => {
+  if (!deferredPrompt.value) return
+  try {
+    deferredPrompt.value.prompt()
+    const { outcome } = await deferredPrompt.value.userChoice
+    console.log(`User response to PWA install prompt: ${outcome}`)
+  } catch (err) {
+    console.error('Failed to trigger PWA installation:', err)
+  } finally {
+    deferredPrompt.value = null
+    isPwaInstallable.value = false
+  }
+}
+
 // Toast system
 const toastMsg = ref<string | null>(null)
 const showToast = (msg: string) => {
@@ -77,9 +109,25 @@ const saveHistoryToCache = () => {
   }
 }
 
-// Initialize history workspace cache
+// Initialize history workspace cache & PWA listeners
 onMounted(() => {
   loadHistoryFromCache()
+  
+  if (typeof window !== 'undefined') {
+    isMac.value = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault()
+      deferredPrompt.value = e
+      isPwaInstallable.value = true
+    })
+    
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt.value = null
+      isPwaInstallable.value = false
+      showToast('MarkDownify installed successfully!')
+    })
+  }
 })
 
 // Computed properties
@@ -239,6 +287,7 @@ const downloadSingleFile = (item: FileItem, optimizedContent?: string) => {
   a.click()
   URL.revokeObjectURL(url)
   showToast(`Downloaded "${baseName}.md"`)
+  handleDownloadTrigger()
 }
 
 // Download all completed conversions as a ZIP archive
@@ -261,6 +310,7 @@ const downloadAllAsZip = async () => {
     a.click()
     URL.revokeObjectURL(url)
     showToast('Downloaded all conversions as ZIP archive.')
+    handleDownloadTrigger()
   } catch (err) {
     console.error('Failed to create ZIP package:', err)
     showToast('ZIP generation failed.')
@@ -795,6 +845,137 @@ const toggleFaq = (index: number) => {
       </div>
     </div>
 
+    <!-- 3. SUCCESS / ENGAGEMENT MODAL (Glassmorphism design, triggered on first download) -->
+    <Transition name="modal-fade">
+      <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <!-- Backdrop Blur (Glassmorphism dark overlay) -->
+        <div class="absolute inset-0 bg-neutral-950/60 backdrop-blur-sm transition-opacity" @click="showSuccessModal = false" />
+        
+        <!-- Modal Card Container -->
+        <div class="relative w-full max-w-md rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white dark:bg-neutral-900 shadow-2xl p-6 md:p-8 space-y-6 overflow-hidden z-10 transition-all transform duration-350 select-none">
+          <!-- Glow Decorative Accent -->
+          <div class="absolute -right-16 -top-16 w-32 h-32 bg-primary-500/10 rounded-full blur-2xl pointer-events-none" />
+          
+          <!-- Header (Success check + Title) -->
+          <div class="text-center space-y-3 relative z-10">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+              <UIcon name="i-lucide-party-popper" class="w-6 h-6" />
+            </div>
+            <h3 class="text-lg font-black text-neutral-900 dark:text-white tracking-tight">
+              File Converted Successfully! 🎉
+            </h3>
+            <p class="text-xs text-neutral-550 dark:text-neutral-400 max-w-sm mx-auto leading-relaxed">
+              MarkDownify operates <strong>100% locally</strong> in your browser with zero servers. 
+              Bookmark us or share the project to help others save LLM prompt tokens!
+            </p>
+          </div>
+
+          <!-- Interactive Action Steps -->
+          <div class="space-y-3 relative z-10">
+            <!-- 1. Bookmark App Row -->
+            <div class="flex items-center justify-between p-3.5 rounded-xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/20 text-xs">
+              <div class="space-y-0.5 pr-2">
+                <span class="font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+                  <UIcon name="i-lucide-bookmark" class="text-primary-500 w-4 h-4" />
+                  Bookmark MarkDownify
+                </span>
+                <p class="text-[10px] text-neutral-450 leading-normal">Add to your browser favorites bar for instant access</p>
+              </div>
+              <div class="shrink-0 flex items-center gap-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 px-2 py-1 rounded-md text-[10px] font-mono font-bold text-neutral-600 dark:text-neutral-300 shadow-sm">
+                <span>{{ isMac ? '⌘' : 'Ctrl' }}</span>
+                <span>+</span>
+                <span>D</span>
+              </div>
+            </div>
+
+            <!-- 2. PWA Install App Row (Visible if installable) -->
+            <div v-if="isPwaInstallable" class="flex items-center justify-between p-3.5 rounded-xl border border-neutral-100 dark:border-neutral-850 bg-neutral-50/50 dark:bg-neutral-950/20 text-xs">
+              <div class="space-y-0.5 pr-2">
+                <span class="font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+                  <UIcon name="i-lucide-monitor-play" class="text-primary-500 w-4 h-4" />
+                  Install App Natively
+                </span>
+                <p class="text-[10px] text-neutral-450 leading-normal">Access offline as a standalone desktop utility</p>
+              </div>
+              <UButton
+                size="xs"
+                color="neutral"
+                variant="subtle"
+                class="font-bold cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+                @click="installPwaApp"
+              >
+                Install App
+              </UButton>
+            </div>
+
+            <!-- 3. Star Repository Row -->
+            <div class="flex items-center justify-between p-3.5 rounded-xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/20 text-xs">
+              <div class="space-y-0.5 pr-2">
+                <span class="font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+                  <UIcon name="i-lucide-star" class="text-amber-500 w-4 h-4" />
+                  Star on GitHub
+                </span>
+                <p class="text-[10px] text-neutral-450 leading-normal">Help the open-source CLI & MCP project trend!</p>
+              </div>
+              <UButton
+                to="https://github.com/Syf-Almjd/cli-doc2md-mcp"
+                target="_blank"
+                size="xs"
+                color="neutral"
+                variant="subtle"
+                icon="i-simple-icons-github"
+                class="font-bold cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+              >
+                Star Repo
+              </UButton>
+            </div>
+          </div>
+
+          <!-- Social Share Loop / Direct actions -->
+          <div class="grid grid-cols-2 gap-4 relative z-10">
+            <!-- Share on Twitter/X -->
+            <UButton
+              to="https://twitter.com/intent/tweet?text=I%20just%20converted%20my%20documents%20to%20clean%20Markdown%20100%25%20locally%20with%20%23MarkDownify%20to%20save%2070%25%20of%20my%20LLM%20prompt%20tokens!%20Check%20it%20out%20by%20%40Syf_Almjd%3A%20https%3A%2F%2Fmarkdownify.qzz.io%2F"
+              target="_blank"
+              icon="i-simple-icons-x"
+              color="neutral"
+              variant="subtle"
+              block
+              class="font-bold cursor-pointer text-xs py-2 hover:scale-105 active:scale-95 transition-all"
+            >
+              Share on X
+            </UButton>
+
+            <!-- Share on Reddit -->
+            <UButton
+              to="https://www.reddit.com/submit?url=https%3A%2F%2Fmarkdownify.qzz.io%2F&title=MarkDownify%20-%20Transform%20any%20file%20to%20Token-Efficient%20Markdown%20completely%20locally"
+              target="_blank"
+              icon="i-simple-icons-reddit"
+              color="neutral"
+              variant="subtle"
+              block
+              class="font-bold cursor-pointer text-xs py-2 hover:scale-105 active:scale-95 transition-all"
+            >
+              Share on Reddit
+            </UButton>
+          </div>
+
+          <!-- Footer / Close button -->
+          <div class="flex justify-end pt-2 border-t border-neutral-100 dark:border-neutral-800/40 relative z-10">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              class="font-bold cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              @click="showSuccessModal = false"
+            >
+              Dismiss
+            </UButton>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Toast Notification (Zero-Gradient solid panel) -->
     <Transition name="fade">
       <div
@@ -849,6 +1030,17 @@ input[type=range]::-webkit-slider-runnable-track {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
+}
+
+/* Modal fade transition */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.96);
 }
 
 /* Expand/Collapse accordion transition */
