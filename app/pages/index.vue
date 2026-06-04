@@ -302,6 +302,30 @@ const calculatorStats = computed(() => {
     annualSavings
   }
 })
+
+// FAQ Section Data for SEO and UX Info
+const faqs = [
+  {
+    question: 'What is MarkDownify?',
+    answer: 'MarkDownify is a 100% serverless, private web application that converts documents (PDF, Word, Excel, PowerPoint, HTML, Images, Audio) into clean, standard Markdown. It is optimized to clean up document noise and minimize prompt token usage for AI assistants.'
+  },
+  {
+    question: 'How does MarkDownify save up to 70% of LLM tokens?',
+    answer: 'Traditional documents carry massive structural details, styling formats, and metadata bloat that drains LLM contexts. MarkDownify removes this overhead, formats tables and headings cleanly, and processes embedded images via local Web OCR. This results in high-density prompts that save up to 70% on token fees.'
+  },
+  {
+    question: 'Is my document data secure on MarkDownify?',
+    answer: 'Yes, absolutely. MarkDownify is completely serverless and runs entirely in your local browser sandbox. It uses Web Assembly (WASM) and local Javascript APIs to process all documents on-device. Your files are never uploaded, tracked, or sent to a server.'
+  },
+  {
+    question: 'How do I run MarkDownify inside Claude Desktop or CLI?',
+    answer: 'The repository includes a ready-to-use Model Context Protocol (MCP) server inside the `./cli-doc2md-mcp` folder. You can configure Claude to run this server locally, giving your Claude chats direct, token-optimized access to your local files.'
+  }
+]
+const activeFaqIndex = ref<number | null>(null)
+const toggleFaq = (index: number) => {
+  activeFaqIndex.value = activeFaqIndex.value === index ? null : index
+}
 </script>
 
 <template>
@@ -548,6 +572,42 @@ const calculatorStats = computed(() => {
           <p class="text-[11px] text-neutral-550 dark:text-neutral-450 leading-relaxed font-medium">
             Word documents, PDF, Excel sheets, PowerPoint presentations, EPUB, HTML, Audio transcribing & ZIP.
           </p>
+        </div>
+      </div>
+
+      <!-- FAQ Accordion Section for SEO and User Guidance -->
+      <div class="border-t border-neutral-200/50 dark:border-neutral-800/40 pt-10 mt-6 space-y-6">
+        <div class="text-center space-y-2 max-w-xl mx-auto">
+          <h2 class="text-xl font-black text-neutral-900 dark:text-white tracking-tight">
+            Frequently Asked Questions
+          </h2>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400">
+            Learn more about how MarkDownify optimizes prompts and handles your documents.
+          </p>
+        </div>
+        <div class="max-w-3xl mx-auto space-y-3">
+          <div
+            v-for="(faq, idx) in faqs"
+            :key="idx"
+            class="glass-panel border border-neutral-200/60 dark:border-neutral-800/40 rounded-2xl overflow-hidden transition-all duration-200"
+          >
+            <button
+              class="w-full py-4 px-5 text-left flex items-center justify-between font-bold text-xs text-neutral-900 dark:text-white hover:bg-neutral-50/50 dark:hover:bg-neutral-900/35 transition-colors cursor-pointer"
+              @click="toggleFaq(idx)"
+            >
+              <span>{{ faq.question }}</span>
+              <UIcon
+                :name="activeFaqIndex === idx ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                class="w-4 h-4 text-neutral-450"
+              />
+            </button>
+            <div
+              v-show="activeFaqIndex === idx"
+              class="px-5 pb-4 text-[11px] text-neutral-550 dark:text-neutral-450 leading-relaxed border-t border-neutral-100 dark:border-neutral-900/40 pt-3"
+            >
+              {{ faq.answer }}
+            </div>
+          </div>
         </div>
       </div>
     </div>

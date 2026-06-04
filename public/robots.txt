@@ -1,4 +1,42 @@
+# Robots.txt for MarkDownify (https://markdownify.qzz.io)
+
+# Default Rules for Search Engines
 User-agent: *
 Allow: /
 
+# Explicitly Allow AI Search & Chat Crawlers to read content for real-time search queries
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+# Host Address
+Host: https://markdownify.qzz.io
+
+# Sitemap Registry
 Sitemap: https://markdownify.qzz.io/sitemap.xml

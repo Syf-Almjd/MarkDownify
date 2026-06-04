@@ -7,7 +7,8 @@ useHead({
   ],
   link: [
     { rel: 'icon', href: '/favicon.ico' },
-    { rel: 'canonical', href: 'https://markdownify.qzz.io/' }
+    { rel: 'canonical', href: 'https://markdownify.qzz.io/' },
+    { rel: 'manifest', href: '/site.webmanifest' }
   ],
   htmlAttrs: {
     lang: 'en'
@@ -17,25 +18,66 @@ useHead({
       type: 'application/ld+json',
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
-        '@type': 'WebApplication',
-        'name': 'MarkDownify',
-        'alternateName': 'Token Saver Studio',
-        'url': 'https://markdownify.qzz.io/',
-        'image': 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=1200&auto=format&fit=crop&q=80',
-        'description': 'Transform any file (PDF, Word, Excel, PowerPoint, HTML, Images, Audio) into clean, standard Markdown completely in your browser. Save up to 70% of LLM tokens for GPT/Claude prompts.',
-        'applicationCategory': 'DeveloperApplication, Utility',
-        'operatingSystem': 'All',
-        'browserRequirements': 'Requires JavaScript. Requires HTML5.',
-        'creator': {
-          '@type': 'Person',
-          'name': 'SaifAlmajd',
-          'url': 'https://github.com/Syf-Almjd'
-        },
-        'offers': {
-          '@type': 'Offer',
-          'price': '0.00',
-          'priceCurrency': 'USD'
-        }
+        '@graph': [
+          {
+            '@type': 'WebApplication',
+            'name': 'MarkDownify',
+            'alternateName': 'Token Saver Studio',
+            'url': 'https://markdownify.qzz.io/',
+            'image': 'https://markdownify.qzz.io/og-image.png',
+            'description': 'Transform any file (PDF, Word, Excel, PowerPoint, HTML, Images, Audio) into clean, standard Markdown completely in your browser. Save up to 70% of LLM tokens for GPT/Claude prompts.',
+            'applicationCategory': 'DeveloperApplication, Utility',
+            'operatingSystem': 'All',
+            'browserRequirements': 'Requires JavaScript. Requires HTML5.',
+            'creator': {
+              '@type': 'Person',
+              'name': 'SaifAlmajd',
+              'url': 'https://github.com/Syf-Almjd'
+            },
+            'offers': {
+              '@type': 'Offer',
+              'price': '0.00',
+              'priceCurrency': 'USD'
+            }
+          },
+          {
+            '@type': 'FAQPage',
+            'mainEntity': [
+              {
+                '@type': 'Question',
+                'name': 'What is MarkDownify?',
+                'acceptedAnswer': {
+                  '@type': 'Answer',
+                  'text': 'MarkDownify is a 100% serverless, private web application that converts documents (PDF, Word, Excel, PowerPoint, HTML, Images, Audio) into clean, standard Markdown. It is optimized to clean up document noise and minimize prompt token usage for AI assistants.'
+                }
+              },
+              {
+                '@type': 'Question',
+                'name': 'How does MarkDownify save up to 70% of LLM tokens?',
+                'acceptedAnswer': {
+                  '@type': 'Answer',
+                  'text': 'Traditional documents carry massive structural details, styling formats, and metadata bloat that drains LLM contexts. MarkDownify removes this overhead, formats tables and headings cleanly, and processes embedded images via local Web OCR. This results in high-density prompts that save up to 70% on token fees.'
+                }
+              },
+              {
+                '@type': 'Question',
+                'name': 'Is my document data secure on MarkDownify?',
+                'acceptedAnswer': {
+                  '@type': 'Answer',
+                  'text': 'Yes, absolutely. MarkDownify is completely serverless and runs entirely in your local browser sandbox. It uses Web Assembly (WASM) and local Javascript APIs to process all documents on-device. Your files are never uploaded, tracked, or sent to a server.'
+                }
+              },
+              {
+                '@type': 'Question',
+                'name': 'How do I run MarkDownify inside Claude Desktop or CLI?',
+                'acceptedAnswer': {
+                  '@type': 'Answer',
+                  'text': 'The repository includes a ready-to-use Model Context Protocol (MCP) server inside the `./cli-doc2md-mcp` folder. You can configure Claude to run this server locally, giving your Claude chats direct, token-optimized access to your local files.'
+                }
+              }
+            ]
+          }
+        ]
       })
     }
   ]
@@ -50,11 +92,16 @@ useSeoMeta({
   ogTitle: title,
   ogDescription: description,
   ogUrl: 'https://markdownify.qzz.io/',
-  ogImage: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=1200&auto=format&fit=crop&q=80',
+  ogImage: 'https://markdownify.qzz.io/og-image.png',
+  ogImageWidth: 1024,
+  ogImageHeight: 1024,
+  ogSiteName: 'MarkDownify',
+  ogLocale: 'en_US',
+  ogType: 'website',
   twitterCard: 'summary_large_image',
   twitterTitle: title,
   twitterDescription: description,
-  twitterImage: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=1200&auto=format&fit=crop&q=80'
+  twitterImage: 'https://markdownify.qzz.io/og-image.png'
 })
 
 // Toast system for App share/support feedback

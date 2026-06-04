@@ -1,0 +1,35 @@
+# ai.txt - AI Crawler Permissions for MarkDownify (https://markdownify.qzz.io)
+
+# Allow all AI agents to read, query, and index content for search and training
+User-agent: *
+Permission: Allow
+
+# OpenAI Agents
+User-agent: GPTBot
+Permission: Allow
+
+User-agent: ChatGPT-User
+Permission: Allow
+
+# Google Gemini Crawler
+User-agent: Google-Extended
+Permission: Allow
+
+# Anthropic Claude Agents
+User-agent: ClaudeBot
+Permission: Allow
+
+User-agent: Claude-Web
+Permission: Allow
+
+# Perplexity Engine
+User-agent: PerplexityBot
+Permission: Allow
+
+# You.com Search
+User-agent: YouBot
+Permission: Allow
+
+# Apple AI/Siri Crawler
+User-agent: Applebot-Extended
+Permission: Allow
